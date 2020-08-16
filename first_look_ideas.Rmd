@@ -785,8 +785,7 @@ ps %>% replace_na(list(
 ## Basic Regressions
 
 ### Ireland
-
-<div class=table-container>
+#### Policy Support
 
 ```{r include = TRUE, size="tiny"}
 
@@ -796,28 +795,54 @@ df <- Ireland_c
 message("Predictors of Policy Support")
 
 fit <- lm(policy_support_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
-
 summary(fit)
+apa_lm <- apa_print(fit)
+```
 
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of Policy Support.")
+```
+
+#### Physical Contact Measures
+
+```{r include = TRUE, size="tiny"}
 message("Predictors of adherence to Physical Contact measures")
 
 fit <- lm(physical_contact_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
 
 summary(fit)
+apa_lm <- apa_print(fit)
+```
 
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Contact measures.")
+```
+
+#### Physical Hygiene measures 
+
+```{r include = TRUE, size="tiny"}
 message("Predictors of adherence to Physical Hygiene measures")
 
 fit <- lm(physical_hygiene_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
 
 summary(fit)
-
-
+apa_lm <- apa_print(fit)
 ```
-</div>
+
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Hygiene measures.")
+```
+
 
 
 ### USA
-
+#### Policy Support
 ```{r include = TRUE, size="tiny"}
 options(width = 1000)
 #USA <- World_part_c[which(World_part_c$country=="USA"),]
@@ -827,26 +852,54 @@ message("Predictors of Policy Support")
 fit <- lm(policy_support_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
 
 summary(fit)
+apa_lm <- apa_print(fit)
+```
 
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of Policy Support.")
+```
+
+#### Physical Contact Measures
+
+```{r include = TRUE, size="tiny"}
 message("Predictors of adherence to Physical Contact measures")
 
 fit <- lm(physical_contact_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
 
 summary(fit)
+apa_lm <- apa_print(fit)
+```
 
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Contact measures.")
+```
+
+#### Physical Hygiene measures
+
+```{r include = TRUE, size="tiny"}
 message("Predictors of adherence to Physical Hygiene measures")
 
 fit <- lm(physical_hygiene_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
 
 summary(fit)
+apa_lm <- apa_print(fit)
+```
 
+```{r include=TRUE, results='asis'}
 
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Hygiene measures.")
 ```
 
 
 
-### World
 
+### World
+#### Policy Support
 ```{r include = TRUE, size="tiny"}
 
 options(width = 1000)
@@ -857,21 +910,50 @@ message("Predictors of Policy Support")
 fit <- lm(policy_support_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
 
 summary(fit)
+apa_lm <- apa_print(fit)
+```
 
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of Policy Support.")
+```
+
+#### Physical Contact Measures
+
+```{r include = TRUE, size="tiny"}
 message("Predictors of adherence to Physical Contact measures")
 
 fit <- lm(physical_contact_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
 
 summary(fit)
+apa_lm <- apa_print(fit)
+```
 
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Contact measures.")
+```
+
+#### Physical Hygiene measures
+
+```{r include = TRUE, size="tiny"}
 message("Predictors of adherence to Physical Hygiene measures")
 
 fit <- lm(physical_hygiene_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
 
 summary(fit)
-
-
+apa_lm <- apa_print(fit)
 ```
+
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Hygiene measures.")
+```
+
+
 
 ## Some Basic Interaction Plots
 
