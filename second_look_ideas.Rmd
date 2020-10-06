@@ -1,0 +1,1213 @@
+---
+title: "COVID-19 Many Labs Study"
+subtitle: "Pre-Registration Ideas for Irish Team"
+author: "Cillian McHugh, Siobhán M. Griffin, Darragh McGashin, Paul J. Maher"
+date: "15th August 2020"
+bibliography: "../../Research_general/resources/bib/My Library.bib"
+csl: "../../Research_general/apa.csl"
+output:
+  bookdown::html_document2:
+    fig_caption: yes
+    toc: true
+    toc_float:
+      toc_collapsed: false
+    toc_depth: 4
+    number_sections: false
+editor_options: 
+  chunk_output_type: console
+---
+<style type="text/css">
+  .table-container {
+  width: 100%;
+  overflow-x: scroll;
+}
+</style>
+
+
+# First Look
+
+In this document I have provided a brief overview of some of the relationships between the variables in the Irish sample and in 10% of the International sample. This is intended to guide the feasibility of our proposed hypotheses for pre-registration to access the full dataset. 
+
+### Notes
+
+- Some of the tables below are difficult to read/navigate. Apologies, it is tricky to try and include enough information to be meaningful, without presenting it in a way that is overwhelming
+- I have included a Google doc at the end of this for content relating to the preregistration.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(include = FALSE)
+```
+
+```{r}
+
+# <script>
+# $(document).ready(function() {
+#   $items = $('div#TOC li');
+#   $items.each(function(idx) {
+#     num_ul = $(this).parentsUntil('#TOC').length;
+#     $(this).css({'text-indent': num_ul * 10, 'padding-left': 10});
+#   });
+# 
+# });
+# </script>
+
+# output:
+#   bookdown::html_document2:
+#     fig_caption: yes
+#     toc: true
+#     toc_float:
+#       toc_collapsed: false
+#     toc_depth: 4
+#     number_sections: false
+# editor_options: 
+#   chunk_output_type: console
+
+```
+
+
+```{r loadlibraries}
+rm(list=ls())
+library(tidyverse)
+library(plyr)
+library(psych)
+library(skimr)
+library(corrplot)
+library(Hmisc)
+#library(psy)
+library(afex)
+library(desnum)
+library(papaja)
+library(purrr)
+library(interactions)
+library(kableExtra)
+library(data.table)
+```
+
+```{r load_data}
+#setwd("../COVID_19/many_labs")
+#source("set_up_data.R")
+load("../many_labs/COVID_manylabs_data.RData")
+
+```
+
+```{r basiccorrelationsIreland}
+
+df <- Ireland_c
+
+cor.test(df$moral_identity_internal,df$moral_identity_symbolic)
+plot(df$moral_identity_internal,df$moral_identity_symbolic)
+abline(lm(df$moral_identity_internal~df$moral_identity_symbolic))
+
+totals <- function(df){
+  subset(df,select=c(
+      physical_contact_tot
+      , physical_hygiene_tot
+      , policy_support_tot
+      , psych_wellbeing_tot
+      , collective_narcissism_tot
+      , national_ID_tot
+      , conspiracy_tot
+      , open_minded_tot
+      , morality_as_cooperat_1
+      , morality_as_cooperat_2
+      , morality_as_cooperat_3
+      , morality_as_cooperat_4
+      , morality_as_cooperat_5
+      , morality_as_cooperat_6
+      , trait_optimism_tot
+      , social_belonging_tot
+      , self_control_tot
+      , self_esteem
+      , narcissism_admiration_tot
+      , narcissism_rivalry_tot
+      , moral_identity_internal
+      , moral_identity_symbolic
+      , risk_perception_tot
+      , political_ideology
+      , moral_circle
+              ))
+}
+
+
+totals(df) 
+ 
+#x <- daply(df, .(Country), function(x)return(x))
+#x <- df %>% group_by(country) %>%  group_split(country)
+
+
+#x <- df %>% group_by(country) %>% do(data = (.)) %>% with( set_names(data, country) )
+#y <- lapply(x, totals)
+y <- totals(df)
+#daply()
+
+#mydata <- df %>% group_by(Country) %>% do(totals(.))
+
+
+mydata_cor_fun <- function(mydata){cor(mydata, method = c("pearson"), use = "complete.obs")}
+
+#z <- lapply(y, mydata_cor_fun)
+
+z <- mydata_cor_fun(y)
+#mydata.cor
+
+#corrplot(z)
+
+mydata.rcorr = rcorr(as.matrix(y))
+mydata.rcorr
+# 
+mydata.coeff = mydata.rcorr$r
+mydata.p = mydata.rcorr$P
+
+#corrplot(mydata.cor)
+
+```
+
+# Irish Sample Overview
+
+Once incomplete responses had been removed we were left with a sample of *N* = `r length(df$sex)` participants (`r sum(df$sex=="Female")`, female, `r sum(df$sex=="Male")` male, *M*~age~ = `r round(mean(df$age),digits=2)`, min = `r min(df$age)`, max = `r max(df$age)`, *SD* = `r round(sd(df$age),digits=2)`) recruited primarily through snowball sampling (*n*~snowball~ = `r sum(df$survey=="snowball")`, *n*~prolific~ = `r sum(df$survey=="prolific")`). 
+
+## Basic Correlations in Ireland
+
+Below is a correlation table for (almost) all the variables. Direction and strength of correlation indicated by colour and relative intensity. The correlation coefficients are displayed for each relationship within Figure\ \@ref(fig:plotireland) (and relevant *p* values are displayed in Table\ \@ref(tab:corpvaluesireland)).
+
+```{r plotireland, fig.cap="Correlation coefficients for all correlations in the Irish sample", fig.height=10, fig.width=15, out.width = '180%',, include=TRUE}
+
+cor.plot(z, las=2, MAR = 8, cex=0.9)
+
+```
+
+<div class=table-container>
+```{r corpvaluesireland,  include=TRUE}
+
+ps <- round(mydata.p, digits=3)
+
+#ps <- as.data.frame(mydata.p)
+
+ps <- as.data.frame(ps)
+
+ps %>% replace_na(list(
+        physical_contact_tot      = "N/A" 
+      , physical_hygiene_tot      = "N/A"  
+      , policy_support_tot        = "N/A"      
+      , psych_wellbeing_tot       = "N/A"       
+      , collective_narcissism_tot = "N/A"             
+      , national_ID_tot           = "N/A"   
+      , conspiracy_tot            = "N/A"         
+      , open_minded_tot           = "N/A"   
+      , morality_as_cooperat_1    = "N/A"   
+      , morality_as_cooperat_2    = "N/A"   
+      , morality_as_cooperat_3    = "N/A"   
+      , morality_as_cooperat_4    = "N/A"   
+      , morality_as_cooperat_5    = "N/A"   
+      , morality_as_cooperat_6    = "N/A"   
+      , trait_optimism_tot        = "N/A"      
+      , social_belonging_tot      = "N/A" 
+      , self_control_tot          = "N/A"           
+      , self_esteem               = "N/A"             
+      , narcissism_admiration_tot = "N/A"      
+      , narcissism_rivalry_tot    = "N/A"   
+      , moral_identity_internal   = "N/A"    
+      , moral_identity_symbolic   = "N/A"    
+      , risk_perception_tot       = "N/A"       
+      , political_ideology        = "N/A" 
+      , moral_circle              = "N/A"    )) %>% 
+  mutate(
+    physical_contact_tot = cell_spec(physical_contact_tot, "html", color = ifelse(physical_contact_tot <.05, "red", "black"))
+  , physical_hygiene_tot = cell_spec(physical_hygiene_tot, "html", color = ifelse(physical_hygiene_tot <.05, "red", "black"))                                     , policy_support_tot = cell_spec(policy_support_tot, "html", color = ifelse(policy_support_tot <.05, "red", "black"))
+  , psych_wellbeing_tot = cell_spec(psych_wellbeing_tot, "html", color = ifelse(psych_wellbeing_tot <.05, "red", "black"))
+  , collective_narcissism_tot = cell_spec(collective_narcissism_tot, "html", color = ifelse(collective_narcissism_tot <.05, "red", "black"))
+  , national_ID_tot = cell_spec(national_ID_tot, "html", color = ifelse(national_ID_tot <.05, "red", "black"))
+  , conspiracy_tot = cell_spec(conspiracy_tot, "html", color = ifelse(conspiracy_tot <.05, "red", "black"))
+  , open_minded_tot = cell_spec(open_minded_tot, "html", color = ifelse(open_minded_tot <.05, "red", "black"))
+  , morality_as_cooperat_1 = cell_spec(morality_as_cooperat_1, "html", color = ifelse(morality_as_cooperat_1 <.05, "red", "black"))
+  , morality_as_cooperat_2 = cell_spec(morality_as_cooperat_2, "html", color = ifelse(morality_as_cooperat_2 <.05, "red", "black"))
+  , morality_as_cooperat_3 = cell_spec(morality_as_cooperat_3, "html", color = ifelse(morality_as_cooperat_3 <.05, "red", "black"))
+  , morality_as_cooperat_4 = cell_spec(morality_as_cooperat_4, "html", color = ifelse(morality_as_cooperat_4 <.05, "red", "black"))
+  , morality_as_cooperat_5 = cell_spec(morality_as_cooperat_5, "html", color = ifelse(morality_as_cooperat_5 <.05, "red", "black"))
+  , morality_as_cooperat_6 = cell_spec(morality_as_cooperat_6, "html", color = ifelse(morality_as_cooperat_6 <.05, "red", "black"))
+  , trait_optimism_tot = cell_spec(trait_optimism_tot, "html", color = ifelse(trait_optimism_tot <.05, "red", "black"))
+  , social_belonging_tot = cell_spec(social_belonging_tot, "html", color = ifelse(social_belonging_tot <.05, "red", "black"))
+  , self_control_tot = cell_spec(self_control_tot, "html", color = ifelse(self_control_tot <.05, "red", "black"))
+  , self_esteem = cell_spec(self_esteem, "html", color = ifelse(self_esteem <.05, "red", "black"))
+  , narcissism_admiration_tot = cell_spec(narcissism_admiration_tot, "html", color = ifelse(narcissism_admiration_tot <.05, "red", "black"))
+  , narcissism_rivalry_tot = cell_spec(narcissism_rivalry_tot, "html", color = ifelse(narcissism_rivalry_tot <.05, "red", "black"))
+  , moral_identity_internal = cell_spec(moral_identity_internal, "html", color = ifelse(moral_identity_internal <.05, "red", "black"))
+  , moral_identity_symbolic = cell_spec(moral_identity_symbolic, "html", color = ifelse(moral_identity_symbolic <.05, "red", "black"))
+  , risk_perception_tot = cell_spec(risk_perception_tot, "html", color = ifelse(risk_perception_tot <.05, "red", "black"))
+  , political_ideology = cell_spec(political_ideology, "html", color = ifelse(political_ideology <.05, "red", "black"))
+  , moral_circle = cell_spec(moral_circle, "html", color = ifelse(moral_circle <.05, "red", "black"))
+                                                                                )%>%
+  kable(format = "html", escape = F, caption = "All p values for correlations displayed in Figure 1") %>%
+  kable_styling("striped", full_width = F) %>% 
+  row_spec(0:25, font_size = 9)
+
+
+```
+</div>
+
+```{r basiccorrelationsworld}
+
+df <- World_full_c
+
+cor.test(df$moral_identity_internal,df$moral_identity_symbolic)
+plot(df$moral_identity_internal,df$moral_identity_symbolic)
+abline(lm(df$moral_identity_internal~df$moral_identity_symbolic))
+
+
+
+totals(df) 
+ 
+#x <- daply(df, .(Country), function(x)return(x))
+#x <- df %>% group_by(country) %>%  group_split(country)
+
+
+x <- df %>% group_by(country) %>% do(data = (.)) %>% with( set_names(data, country) )
+y <- lapply(x, totals)
+ytot <- totals(df)
+#daply()
+
+#mydata <- df %>% group_by(Country) %>% do(totals(.))
+
+
+mydata_cor_fun <- function(mydata){cor(mydata, method = c("pearson"), use = "complete.obs")}
+
+z <- lapply(y, mydata_cor_fun)
+
+ztot <- mydata_cor_fun(ytot)
+#mydata.cor
+
+#corrplot(z)
+#cor.plot(z, las=2)
+mydata.rcorr = rcorr(as.matrix(ztot))
+#mydata.rcorr = rcorr(as.matrix(mydata))
+#mydata.rcorr
+
+mydata.coeff = mydata.rcorr$r
+mydata.p = mydata.rcorr$P
+
+
+#corrplot(mydata.cor)
+
+```
+
+# International Sample Overview
+
+Randomly selected 10% of the International sample resulted in a sample of *N* = `r length(df$sex)` participants (`r sum(df$sex==1, na.rm=T)`, female, `r sum(df$sex==2, na.rm=T)` male,  `r sum(df$sex==3, na.rm=T)` other, *M*~age~ = `r round(mean(df$age,na.rm=T),digits=2)`, min = `r min(df$age)`, max = `r max(df$age)`, *SD* = `r round(sd(df$age,na.rm=T),digits=2)`), from `r length(levels(df$country))` countries. Breakdown of the number of participants from each country in the sample is displayed in Table\ \@ref(tab:countrybreakdown).
+
+<div class=table-container>
+```{r countrybreakdown, include=TRUE}
+`colnames<-`(as.data.frame(table(df$country)),c("Country", "N")) %>% 
+  kable(format = "html", escape = F, caption = "Breakdown of total N by Country")%>%
+  kable_styling("striped", full_width = F) %>% 
+  row_spec(0:25, font_size = 9)
+```
+</div>
+
+## Basic International Correlations
+
+As with the Irish sample, I have put together a basic correlation table for most of the variables in Figure\ \@ref(fig:plotworld), with the relevant *p* values in Table\ \@ref(tab:corpvaluesworld)).
+
+```{r plotworld, fig.cap="Correlation coefficients for all correlations in the International sample", fig.height=10, fig.width=15, out.width = '180%', include=TRUE}
+
+cor.plot(ztot, las=2, MAR = 8, cex=0.9)
+
+```
+
+<div class=table-container>
+```{r corpvaluesworld, include=TRUE}
+
+ps <- round(mydata.p, digits=3)
+
+#ps <- as.data.frame(mydata.p)
+
+ps <- as.data.frame(ps)
+
+ps %>% replace_na(list(
+        physical_contact_tot      = "N/A" 
+      , physical_hygiene_tot      = "N/A"  
+      , policy_support_tot        = "N/A"      
+      , psych_wellbeing_tot       = "N/A"       
+      , collective_narcissism_tot = "N/A"             
+      , national_ID_tot           = "N/A"   
+      , conspiracy_tot            = "N/A"         
+      , open_minded_tot           = "N/A"   
+      , morality_as_cooperat_1    = "N/A"   
+      , morality_as_cooperat_2    = "N/A"   
+      , morality_as_cooperat_3    = "N/A"   
+      , morality_as_cooperat_4    = "N/A"   
+      , morality_as_cooperat_5    = "N/A"   
+      , morality_as_cooperat_6    = "N/A"   
+      , trait_optimism_tot        = "N/A"      
+      , social_belonging_tot      = "N/A" 
+      , self_control_tot          = "N/A"           
+      , self_esteem               = "N/A"             
+      , narcissism_admiration_tot = "N/A"      
+      , narcissism_rivalry_tot    = "N/A"   
+      , moral_identity_internal   = "N/A"    
+      , moral_identity_symbolic   = "N/A"    
+      , risk_perception_tot       = "N/A"       
+      , political_ideology        = "N/A" 
+      , moral_circle              = "N/A"    )) %>% 
+  mutate(
+    physical_contact_tot = cell_spec(physical_contact_tot, "html", color = ifelse(physical_contact_tot <.05, "red", "black"))
+  , physical_hygiene_tot = cell_spec(physical_hygiene_tot, "html", color = ifelse(physical_hygiene_tot <.05, "red", "black"))                                     , policy_support_tot = cell_spec(policy_support_tot, "html", color = ifelse(policy_support_tot <.05, "red", "black"))
+  , psych_wellbeing_tot = cell_spec(psych_wellbeing_tot, "html", color = ifelse(psych_wellbeing_tot <.05, "red", "black"))
+  , collective_narcissism_tot = cell_spec(collective_narcissism_tot, "html", color = ifelse(collective_narcissism_tot <.05, "red", "black"))
+  , national_ID_tot = cell_spec(national_ID_tot, "html", color = ifelse(national_ID_tot <.05, "red", "black"))
+  , conspiracy_tot = cell_spec(conspiracy_tot, "html", color = ifelse(conspiracy_tot <.05, "red", "black"))
+  , open_minded_tot = cell_spec(open_minded_tot, "html", color = ifelse(open_minded_tot <.05, "red", "black"))
+  , morality_as_cooperat_1 = cell_spec(morality_as_cooperat_1, "html", color = ifelse(morality_as_cooperat_1 <.05, "red", "black"))
+  , morality_as_cooperat_2 = cell_spec(morality_as_cooperat_2, "html", color = ifelse(morality_as_cooperat_2 <.05, "red", "black"))
+  , morality_as_cooperat_3 = cell_spec(morality_as_cooperat_3, "html", color = ifelse(morality_as_cooperat_3 <.05, "red", "black"))
+  , morality_as_cooperat_4 = cell_spec(morality_as_cooperat_4, "html", color = ifelse(morality_as_cooperat_4 <.05, "red", "black"))
+  , morality_as_cooperat_5 = cell_spec(morality_as_cooperat_5, "html", color = ifelse(morality_as_cooperat_5 <.05, "red", "black"))
+  , morality_as_cooperat_6 = cell_spec(morality_as_cooperat_6, "html", color = ifelse(morality_as_cooperat_6 <.05, "red", "black"))
+  , trait_optimism_tot = cell_spec(trait_optimism_tot, "html", color = ifelse(trait_optimism_tot <.05, "red", "black"))
+  , social_belonging_tot = cell_spec(social_belonging_tot, "html", color = ifelse(social_belonging_tot <.05, "red", "black"))
+  , self_control_tot = cell_spec(self_control_tot, "html", color = ifelse(self_control_tot <.05, "red", "black"))
+  , self_esteem = cell_spec(self_esteem, "html", color = ifelse(self_esteem <.05, "red", "black"))
+  , narcissism_admiration_tot = cell_spec(narcissism_admiration_tot, "html", color = ifelse(narcissism_admiration_tot <.05, "red", "black"))
+  , narcissism_rivalry_tot = cell_spec(narcissism_rivalry_tot, "html", color = ifelse(narcissism_rivalry_tot <.05, "red", "black"))
+  , moral_identity_internal = cell_spec(moral_identity_internal, "html", color = ifelse(moral_identity_internal <.05, "red", "black"))
+  , moral_identity_symbolic = cell_spec(moral_identity_symbolic, "html", color = ifelse(moral_identity_symbolic <.05, "red", "black"))
+  , risk_perception_tot = cell_spec(risk_perception_tot, "html", color = ifelse(risk_perception_tot <.05, "red", "black"))
+  , political_ideology = cell_spec(political_ideology, "html", color = ifelse(political_ideology <.05, "red", "black"))
+  , moral_circle = cell_spec(moral_circle, "html", color = ifelse(moral_circle <.05, "red", "black"))
+                                                                                )%>%
+  kable(format = "html", escape = F, caption = "All p values for correlations displayed in Figure 2") %>%
+  kable_styling("striped", full_width = F) %>% 
+  row_spec(0:25, font_size = 9)
+
+
+```
+</div>
+
+## Correlations by Country
+
+```{r plotworldbycountry, include=FALSE}
+#levels(df$country)
+# table(df$country)
+# 
+# loop_sort <- function(ppn){
+#   corrplot(z[[ppn]], title = paste(names(z[ppn])))
+#   
+#   }
+# 
+# lapply(1:14, loop_sort)
+#  
+# lapply(16:66, loop_sort)
+
+
+```
+
+
+```{r, include=FALSE}
+# levels(df$country)
+# table(df$country)
+# 
+# loop_sort <- function(ppn){
+#   corrplot(z[[ppn]], title = paste(names(z[ppn])))
+#   
+#   }
+# lapply(1:14, loop_sort)
+#  
+# lapply(16:66, loop_sort)
+
+
+```
+
+
+```{r, graphsbycountry, include=TRUE}
+
+# tapply(df$moral_identity_symbolic, df$Country, descriptives)
+# 
+# 
+# moral_id_S_anova <- 
+#   aov_car(
+#     moral_identity_symbolic ~ Country + Error(X1)
+#     , data = df
+#     , type = 3
+#     
+#   )
+# 
+# moral_id_S_anova_results <- apa_print(moral_id_S_anova, es = "pes")
+# moral_id_S_anova_results
+# 
+# 
+# loop_sort(1)
+# [1]
+# loop_sort(2)
+# loop_sort(3)
+# loop_sort(4)
+# loop_sort(5)
+# loop_sort(6)
+# loop_sort(7)
+# loop_sort(8)
+# loop_sort(9)
+# loop_sort(10)
+# loop_sort(11)
+# loop_sort(12)
+# loop_sort(13)
+# loop_sort(14)
+# loop_sort(15)
+# loop_sort(16)
+# loop_sort(17)
+# loop_sort(18)
+# loop_sort(19)
+# loop_sort(20)
+# loop_sort(21)
+# loop_sort(22)
+# loop_sort(23)
+# loop_sort(24)
+# loop_sort(25)
+# loop_sort(26)
+# loop_sort(27)
+# loop_sort(28)
+# loop_sort(29)
+# loop_sort(30)
+# loop_sort(31)
+# loop_sort(32)
+# loop_sort(33)
+# loop_sort(34)
+# loop_sort(35)
+# loop_sort(36)
+# loop_sort(37)
+# loop_sort(38)
+# loop_sort(39)
+# loop_sort(40)
+# loop_sort(41)
+# loop_sort(42)
+# loop_sort(43)
+# loop_sort(44)
+# loop_sort(45)
+# loop_sort(46)
+# loop_sort(47)
+# loop_sort(48)
+# loop_sort(49)
+# loop_sort(50)
+# loop_sort(51)
+# loop_sort(52)
+# loop_sort(53)
+# loop_sort(54)
+# loop_sort(55)
+# loop_sort(56)
+# loop_sort(57)
+# loop_sort(58)
+# loop_sort(59)
+# loop_sort(60)
+# loop_sort(61)
+# loop_sort(62)
+# loop_sort(63)
+# loop_sort(64)
+# loop_sort(65)
+# loop_sort(66)
+```
+
+
+# Some Expected Relationships
+
+Below I have identified specific variables of interest, and some variables that (I think) should be controlled for. I'm primarily interested in the combined influence of **moral identity** and **moral circle** (and/or **political identity**) on **adherence to relevant measures**, and **policy support**. I have included a suite of variables that might be worth controlling for (or trying to control for); these are: *collective narcissism*, *national identification*, *conspiracy beliefs*, *narcissism*, and *risk perception*.
+
+Given that my hypotheses are derived primarily from the discourse in the US, I have provided three versions of the following correlations. First I provide the relationships in the Irish context, then on US sample, and finally the International sample
+
+```{r}
+variables_of_interest <- function(df){
+  subset(df,select=c(
+      physical_contact_tot
+      , physical_hygiene_tot
+      , policy_support_tot
+      , collective_narcissism_tot
+      , national_ID_tot
+      , conspiracy_tot
+      , narcissism_admiration_tot
+      , narcissism_rivalry_tot
+      , moral_identity_internal
+      , moral_identity_symbolic
+      , risk_perception_tot
+      , political_ideology
+      , moral_circle
+              ))
+}
+```
+## Basic Correlations 
+### Ireland
+
+```{r}
+
+df <- Ireland_c
+
+
+y <- variables_of_interest(df)
+#daply()
+
+#mydata <- df %>% group_by(Country) %>% do(totals(.))
+
+
+mydata_cor_fun <- function(mydata){cor(mydata, method = c("pearson"), use = "complete.obs")}
+
+#z <- lapply(y, mydata_cor_fun)
+
+z <- mydata_cor_fun(y)
+#mydata.cor
+
+#corrplot(z)
+
+mydata.rcorr = rcorr(as.matrix(y))
+mydata.rcorr
+# 
+mydata.coeff = mydata.rcorr$r
+mydata.p = mydata.rcorr$P
+
+
+```
+
+
+```{r plotinterest, fig.cap="Correlation coefficients for relevant correlations in the Irish sample", fig.height=10, fig.width=15, out.width = '180%',, include=TRUE}
+
+cor.plot(z, las=2, MAR = 8, cex=0.9)
+
+```
+
+<div class=table-container>
+```{r corpvaluesinterest,  include=TRUE}
+
+ps <- round(mydata.p, digits=3)
+#ps <- as.data.frame(mydata.p)
+
+ps <- as.data.frame(ps)
+
+ps %>% replace_na(list(
+        physical_contact_tot      = "N/A" 
+      , physical_hygiene_tot      = "N/A"  
+      , policy_support_tot        = "N/A"      
+      , collective_narcissism_tot = "N/A"             
+      , national_ID_tot           = "N/A"   
+      , conspiracy_tot            = "N/A"         
+      , narcissism_admiration_tot = "N/A"      
+      , narcissism_rivalry_tot    = "N/A"   
+      , moral_identity_internal   = "N/A"    
+      , moral_identity_symbolic   = "N/A"    
+      , risk_perception_tot       = "N/A"       
+      , political_ideology        = "N/A" 
+      , moral_circle              = "N/A"    )) %>% 
+  mutate(
+    physical_contact_tot = cell_spec(physical_contact_tot, "html", color = ifelse(physical_contact_tot <.05, "red", "black"))
+  , physical_hygiene_tot = cell_spec(physical_hygiene_tot, "html", color = ifelse(physical_hygiene_tot <.05, "red", "black"))                    , policy_support_tot = cell_spec(policy_support_tot, "html", color = ifelse(policy_support_tot <.05, "red", "black"))
+  , collective_narcissism_tot = cell_spec(collective_narcissism_tot, "html", color = ifelse(collective_narcissism_tot <.05, "red", "black"))
+  , national_ID_tot = cell_spec(national_ID_tot, "html", color = ifelse(national_ID_tot <.05, "red", "black"))
+  , conspiracy_tot = cell_spec(conspiracy_tot, "html", color = ifelse(conspiracy_tot <.05, "red", "black"))
+  , narcissism_admiration_tot = cell_spec(narcissism_admiration_tot, "html", color = ifelse(narcissism_admiration_tot <.05, "red", "black"))
+  , narcissism_rivalry_tot = cell_spec(narcissism_rivalry_tot, "html", color = ifelse(narcissism_rivalry_tot <.05, "red", "black"))
+  , moral_identity_internal = cell_spec(moral_identity_internal, "html", color = ifelse(moral_identity_internal <.05, "red", "black"))
+  , moral_identity_symbolic = cell_spec(moral_identity_symbolic, "html", color = ifelse(moral_identity_symbolic <.05, "red", "black"))
+  , risk_perception_tot = cell_spec(risk_perception_tot, "html", color = ifelse(risk_perception_tot <.05, "red", "black"))
+  , political_ideology = cell_spec(political_ideology, "html", color = ifelse(political_ideology <.05, "red", "black"))
+  , moral_circle = cell_spec(moral_circle, "html", color = ifelse(moral_circle <.05, "red", "black"))
+                                                                                )%>%
+  kable(format = "html", escape = F, caption = "All p values for correlations displayed in Figure 3") %>%
+  kable_styling("striped", full_width = F) %>% 
+  row_spec(0:13, font_size = 9)
+
+
+```
+</div>
+
+### USA
+
+```{r}
+USA <- World_full_c[which(World_full_c$country=="USA"),]
+#df <- World_part_c[which(World_part_c$country=="USA"),]
+df <- USA
+
+y <- variables_of_interest(df)
+#daply()
+
+#mydata <- df %>% group_by(Country) %>% do(totals(.))
+
+
+mydata_cor_fun <- function(mydata){cor(mydata, method = c("pearson"), use = "complete.obs")}
+
+#z <- lapply(y, mydata_cor_fun)
+
+z <- mydata_cor_fun(y)
+#mydata.cor
+
+#corrplot(z)
+
+mydata.rcorr = rcorr(as.matrix(y))
+mydata.rcorr
+# 
+mydata.coeff = mydata.rcorr$r
+mydata.p = mydata.rcorr$P
+
+
+```
+
+```{r plotinterestUS, fig.cap="Correlation coefficients for relevant correlations in the Irish sample", fig.height=10, fig.width=15, out.width = '180%',, include=TRUE}
+
+cor.plot(z, las=2, MAR = 8, cex=0.9)
+
+```
+
+<div class=table-container>
+```{r corpvaluesinterestUS,  include=TRUE}
+
+ps <- round(mydata.p, digits=3)
+#ps <- as.data.frame(mydata.p)
+
+ps <- as.data.frame(ps)
+
+ps %>% replace_na(list(
+        physical_contact_tot      = "N/A" 
+      , physical_hygiene_tot      = "N/A"  
+      , policy_support_tot        = "N/A"      
+      , collective_narcissism_tot = "N/A"             
+      , national_ID_tot           = "N/A"   
+      , conspiracy_tot            = "N/A"         
+      , narcissism_admiration_tot = "N/A"      
+      , narcissism_rivalry_tot    = "N/A"   
+      , moral_identity_internal   = "N/A"    
+      , moral_identity_symbolic   = "N/A"    
+      , risk_perception_tot       = "N/A"       
+      , political_ideology        = "N/A" 
+      , moral_circle              = "N/A"    )) %>% 
+  mutate(
+    physical_contact_tot = cell_spec(physical_contact_tot, "html", color = ifelse(physical_contact_tot <.05, "red", "black"))
+  , physical_hygiene_tot = cell_spec(physical_hygiene_tot, "html", color = ifelse(physical_hygiene_tot <.05, "red", "black"))                    , policy_support_tot = cell_spec(policy_support_tot, "html", color = ifelse(policy_support_tot <.05, "red", "black"))
+  , collective_narcissism_tot = cell_spec(collective_narcissism_tot, "html", color = ifelse(collective_narcissism_tot <.05, "red", "black"))
+  , national_ID_tot = cell_spec(national_ID_tot, "html", color = ifelse(national_ID_tot <.05, "red", "black"))
+  , conspiracy_tot = cell_spec(conspiracy_tot, "html", color = ifelse(conspiracy_tot <.05, "red", "black"))
+  , narcissism_admiration_tot = cell_spec(narcissism_admiration_tot, "html", color = ifelse(narcissism_admiration_tot <.05, "red", "black"))
+  , narcissism_rivalry_tot = cell_spec(narcissism_rivalry_tot, "html", color = ifelse(narcissism_rivalry_tot <.05, "red", "black"))
+  , moral_identity_internal = cell_spec(moral_identity_internal, "html", color = ifelse(moral_identity_internal <.05, "red", "black"))
+  , moral_identity_symbolic = cell_spec(moral_identity_symbolic, "html", color = ifelse(moral_identity_symbolic <.05, "red", "black"))
+  , risk_perception_tot = cell_spec(risk_perception_tot, "html", color = ifelse(risk_perception_tot <.05, "red", "black"))
+  , political_ideology = cell_spec(political_ideology, "html", color = ifelse(political_ideology <.05, "red", "black"))
+  , moral_circle = cell_spec(moral_circle, "html", color = ifelse(moral_circle <.05, "red", "black"))
+                                                                                )%>%
+  kable(format = "html", escape = F, caption = "All p values for correlations displayed in Figure 4") %>%
+  kable_styling("striped", full_width = F) %>% 
+  row_spec(0:13, font_size = 9)
+
+
+```
+</div>
+
+
+### World
+
+
+
+```{r}
+
+df <- World_full_c
+
+
+y <- variables_of_interest(df)
+#daply()
+
+#mydata <- df %>% group_by(Country) %>% do(totals(.))
+
+
+mydata_cor_fun <- function(mydata){cor(mydata, method = c("pearson"), use = "complete.obs")}
+
+#z <- lapply(y, mydata_cor_fun)
+
+z <- mydata_cor_fun(y)
+#mydata.cor
+
+#corrplot(z)
+
+mydata.rcorr = rcorr(as.matrix(y))
+mydata.rcorr
+# 
+mydata.coeff = mydata.rcorr$r
+mydata.p = mydata.rcorr$P
+
+
+```
+
+
+
+
+```{r plotinterestworld, fig.cap="Correlation coefficients for relevant correlations in the Irish sample", fig.height=10, fig.width=15, out.width = '180%',, include=TRUE}
+
+cor.plot(z, las=2, MAR = 8, cex=0.9)
+
+```
+
+<div class=table-container>
+```{r corpvaluesinterestworld,  include=TRUE}
+
+ps <- round(mydata.p, digits=3)
+#ps <- as.data.frame(mydata.p)
+
+ps <- as.data.frame(ps)
+
+ps %>% replace_na(list(
+        physical_contact_tot      = "N/A" 
+      , physical_hygiene_tot      = "N/A"  
+      , policy_support_tot        = "N/A"      
+      , collective_narcissism_tot = "N/A"             
+      , national_ID_tot           = "N/A"   
+      , conspiracy_tot            = "N/A"         
+      , narcissism_admiration_tot = "N/A"      
+      , narcissism_rivalry_tot    = "N/A"   
+      , moral_identity_internal   = "N/A"    
+      , moral_identity_symbolic   = "N/A"    
+      , risk_perception_tot       = "N/A"       
+      , political_ideology        = "N/A" 
+      , moral_circle              = "N/A"    )) %>% 
+  mutate(
+    physical_contact_tot = cell_spec(physical_contact_tot, "html", color = ifelse(physical_contact_tot <.05, "red", "black"))
+  , physical_hygiene_tot = cell_spec(physical_hygiene_tot, "html", color = ifelse(physical_hygiene_tot <.05, "red", "black"))                    , policy_support_tot = cell_spec(policy_support_tot, "html", color = ifelse(policy_support_tot <.05, "red", "black"))
+  , collective_narcissism_tot = cell_spec(collective_narcissism_tot, "html", color = ifelse(collective_narcissism_tot <.05, "red", "black"))
+  , national_ID_tot = cell_spec(national_ID_tot, "html", color = ifelse(national_ID_tot <.05, "red", "black"))
+  , conspiracy_tot = cell_spec(conspiracy_tot, "html", color = ifelse(conspiracy_tot <.05, "red", "black"))
+  , narcissism_admiration_tot = cell_spec(narcissism_admiration_tot, "html", color = ifelse(narcissism_admiration_tot <.05, "red", "black"))
+  , narcissism_rivalry_tot = cell_spec(narcissism_rivalry_tot, "html", color = ifelse(narcissism_rivalry_tot <.05, "red", "black"))
+  , moral_identity_internal = cell_spec(moral_identity_internal, "html", color = ifelse(moral_identity_internal <.05, "red", "black"))
+  , moral_identity_symbolic = cell_spec(moral_identity_symbolic, "html", color = ifelse(moral_identity_symbolic <.05, "red", "black"))
+  , risk_perception_tot = cell_spec(risk_perception_tot, "html", color = ifelse(risk_perception_tot <.05, "red", "black"))
+  , political_ideology = cell_spec(political_ideology, "html", color = ifelse(political_ideology <.05, "red", "black"))
+  , moral_circle = cell_spec(moral_circle, "html", color = ifelse(moral_circle <.05, "red", "black"))
+                                                                                )%>%
+  kable(format = "html", escape = F, caption = "All p values for correlations displayed in Figure 5") %>%
+  kable_styling("striped", full_width = F) %>% 
+  row_spec(0:13, font_size = 9)
+
+
+```
+</div>
+
+
+## Basic Regressions
+
+### Ireland
+#### Policy Support
+
+```{r include = TRUE, size="tiny"}
+
+options(width = 1000)
+df <- Ireland_c
+
+message("Predictors of Policy Support")
+
+fit <- lm(policy_support_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
+summary(fit)
+apa_lm <- apa_print(fit)
+```
+
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of Policy Support.")
+```
+
+#### Physical Contact Measures
+
+```{r include = TRUE, size="tiny"}
+message("Predictors of adherence to Physical Contact measures")
+
+fit <- lm(physical_contact_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
+
+summary(fit)
+apa_lm <- apa_print(fit)
+```
+
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Contact measures.")
+```
+
+#### Physical Hygiene measures 
+
+```{r include = TRUE, size="tiny"}
+message("Predictors of adherence to Physical Hygiene measures")
+
+fit <- lm(physical_hygiene_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
+
+summary(fit)
+apa_lm <- apa_print(fit)
+```
+
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Hygiene measures.")
+```
+
+
+
+### USA
+#### Policy Support
+```{r include = TRUE, size="tiny"}
+options(width = 1000)
+#USA <- World_part_c[which(World_part_c$country=="USA"),]
+df <- USA
+message("Predictors of Policy Support")
+
+fit <- lm(policy_support_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
+
+summary(fit)
+apa_lm <- apa_print(fit)
+```
+
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of Policy Support.")
+```
+
+#### Physical Contact Measures
+
+```{r include = TRUE, size="tiny"}
+message("Predictors of adherence to Physical Contact measures")
+
+fit <- lm(physical_contact_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
+
+summary(fit)
+apa_lm <- apa_print(fit)
+```
+
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Contact measures.")
+```
+
+#### Physical Hygiene measures
+
+```{r include = TRUE, size="tiny"}
+message("Predictors of adherence to Physical Hygiene measures")
+
+fit <- lm(physical_hygiene_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
+
+summary(fit)
+apa_lm <- apa_print(fit)
+```
+
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Hygiene measures.")
+```
+
+
+
+
+### World
+#### Policy Support
+```{r include = TRUE, size="tiny"}
+
+options(width = 1000)
+df <- World_full_c
+
+message("Predictors of Policy Support")
+
+fit <- lm(policy_support_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
+
+summary(fit)
+apa_lm <- apa_print(fit)
+```
+
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of Policy Support.")
+```
+
+#### Physical Contact Measures
+
+```{r include = TRUE, size="tiny"}
+message("Predictors of adherence to Physical Contact measures")
+
+fit <- lm(physical_contact_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
+
+summary(fit)
+apa_lm <- apa_print(fit)
+```
+
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Contact measures.")
+```
+
+#### Physical Hygiene measures
+
+```{r include = TRUE, size="tiny"}
+message("Predictors of adherence to Physical Hygiene measures")
+
+fit <- lm(physical_hygiene_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot + conspiracy_tot + national_ID_tot, df)
+
+summary(fit)
+apa_lm <- apa_print(fit)
+```
+
+```{r include=TRUE, results='asis'}
+
+apa_table(apa_lm$table
+          , caption = "Predictors of adherence to Physical Hygiene measures.")
+```
+
+
+
+## Some Basic Interaction Plots
+
+Below I have plotted the interactions that emerged significant in the regressions above to help visualise the relationships.
+
+- On the Political ideology dimension, higher scores are more conservative, and lower scores are more liberal.
+- Higher scores for Moral Circle indicate a larger moral circle.
+
+### Ireland
+
+```{r irishinteractionplots, include=TRUE}
+df <- Ireland_c
+
+message("Interaction between Symbolic Moral Identity and Moral Circle in predicting Policy support")
+fit <- lm(policy_support_tot ~ moral_identity_symbolic*moral_circle , df)
+summary(fit)
+interact_plot(model = fit, pred = moral_identity_symbolic, modx = moral_circle)
+
+message("Interaction between Symbolic Moral Identity and Moral Circle in predicting adherence to Physical Contact measures")
+fit <- lm(physical_contact_tot ~ moral_identity_symbolic*moral_circle , df)
+summary(fit)
+interact_plot(model = fit, pred = moral_identity_symbolic, modx = moral_circle)
+
+message("No significant interactions relating to Physical Hygiene")
+
+```
+
+### USA
+
+```{r USAinteractionplots, include=TRUE}
+df <- USA
+
+message("Interaction between Symbolic Moral Identity and Political Ideology in predicting Policy support")
+fit <- lm(policy_support_tot ~ moral_identity_symbolic*political_ideology , df)
+summary(fit)
+interact_plot(model = fit, pred = moral_identity_symbolic, modx = political_ideology)
+
+message("No significant interactions relating to Physical Contact measures")
+
+
+message("No significant interactions relating to Physical Hygiene measures")
+
+```
+
+### World
+
+```{r worldinteractionplots, include=TRUE}
+df <- World_full_c
+
+message("Interaction between Symbolic Moral Identity and Political Ideology in predicting Policy support")
+fit <- lm(policy_support_tot ~ moral_identity_symbolic*political_ideology , df)
+summary(fit)
+interact_plot(model = fit, pred = moral_identity_symbolic, modx = political_ideology)
+
+message("Interaction between Symbolic Moral Identity and Moral Circle in predicting adherence to Physical Contact measures")
+fit <- lm(physical_contact_tot ~ moral_identity_symbolic*moral_circle , df)
+summary(fit)
+interact_plot(model = fit, pred = moral_identity_symbolic, modx = moral_circle)
+
+message("Interaction between Symbolic Moral Identity and Moral Circle in predicting adherence to Physical Hygiene measures")
+fit <- lm(physical_hygiene_tot ~ moral_identity_symbolic*political_ideology , df)
+summary(fit)
+interact_plot(model = fit, pred = moral_identity_symbolic, modx = political_ideology)
+```
+
+```{r baciccorsinterest}
+
+df <- World_full_c
+
+cor.test(df$moral_identity_internal,df$moral_identity_symbolic)
+plot(df$moral_identity_internal,df$moral_identity_symbolic)
+abline(lm(df$moral_identity_internal~df$moral_identity_symbolic))
+
+
+
+totals(df) 
+ 
+#x <- daply(df, .(Country), function(x)return(x))
+#x <- df %>% group_by(country) %>%  group_split(country)
+
+
+x <- df %>% group_by(country) %>% do(data = (.)) %>% with( set_names(data, country) )
+y <- lapply(x, totals)
+ytot <- totals(df)
+#daply()
+
+#mydata <- df %>% group_by(Country) %>% do(totals(.))
+
+
+mydata_cor_fun <- function(mydata){cor(mydata, method = c("pearson"), use = "complete.obs")}
+
+z <- lapply(y, mydata_cor_fun)
+
+ztot <- mydata_cor_fun(ytot)
+#mydata.cor
+
+#corrplot(z)
+#cor.plot(z, las=2)
+mydata.rcorr = rcorr(as.matrix(ztot))
+#mydata.rcorr = rcorr(as.matrix(mydata))
+#mydata.rcorr
+
+mydata.coeff = mydata.rcorr$r
+mydata.p = mydata.rcorr$P
+
+
+#corrplot(mydata.cor)
+
+```
+
+
+```{r}
+
+df <- Ireland_c
+
+
+
+df <- Ireland_c
+
+df <- World_full_c[which(World_full_c$country=="USA"),]
+
+df <- World_full_c
+
+
+fit <- lm(policy_support_tot ~ (moral_identity_internal + moral_identity_symbolic)*(moral_circle+political_ideology) + risk_perception_tot + narcissism_admiration_tot + narcissism_rivalry_tot + collective_narcissism_tot , df)
+
+
+
+
+fit <- lm(policy_support_tot ~ moral_identity_symbolic*political_ideology , df)
+summary(fit)
+
+interact_plot(model = fit, pred = moral_identity_symbolic, modx = political_ideology)
+
+
+```
+
+# Checking Policy interaction for all countries
+
+```{r, include=TRUE}
+x <- df %>% group_by(country) %>% do(data = (.)) %>% with( set_names(data, country) )
+
+lm_fun <- function(x){
+  lm(policy_support_tot
+          ~ risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          ### add predictors
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + moral_circle
+          + political_ideology
+          ### add interactions
+          + (moral_identity_internal + moral_identity_symbolic) : (moral_circle+political_ideology)
+          , data = x
+     )
+}
+
+
+all_lms <- lapply(x, lm_fun)
+summary_lms <- lapply(all_lms, summary)
+summary_lms
+
+#### testing something else ####
+
+sig_interactions <- function(x){
+  test <- x$coefficients["moral_identity_internal:moral_circle",]
+  test
+}
+loop_ps <- function(){lapply(summary_lms, sig_interactions)}
+sig_interactions <- do.call(rbind, loop_ps())
+sig_interactions <- as.data.frame(sig_interactions)
+moralIDi_MoralCircle <- sig_interactions[which(sig_interactions$`Pr(>|t|)`<.05),]
+
+sig_interactions <- function(x){
+  test <- x$coefficients["moral_identity_internal:political_ideology",]
+  test
+}
+loop_ps <- function(){lapply(summary_lms, sig_interactions)}
+sig_interactions <- do.call(rbind, loop_ps())
+sig_interactions <- as.data.frame(sig_interactions)
+moralIDi_PI <- sig_interactions[which(sig_interactions$`Pr(>|t|)`<.05),]
+
+sig_interactions <- function(x){
+  test <- x$coefficients["moral_identity_symbolic:moral_circle",]
+  test
+}
+loop_ps <- function(){lapply(summary_lms, sig_interactions)}
+sig_interactions <- do.call(rbind, loop_ps())
+sig_interactions <- as.data.frame(sig_interactions)
+moralIDs_MoralCircle <- sig_interactions[which(sig_interactions$`Pr(>|t|)`<.05),]
+
+sig_interactions <- function(x){
+  test <- x$coefficients["moral_identity_symbolic:political_ideology",]
+  test
+}
+loop_ps <- function(){lapply(summary_lms, sig_interactions)}
+sig_interactions <- do.call(rbind, loop_ps())
+sig_interactions <- as.data.frame(sig_interactions)
+moralIDs_PI <- sig_interactions[which(sig_interactions$`Pr(>|t|)`<.05),]
+
+moralIDi_MoralCircle
+moralIDi_PI
+moralIDs_MoralCircle
+moralIDs_PI
+
+
+
+### moral_identity_internal:moral_circle ###
+ps_MIiMC <- function(x){
+  test <- x$coefficients["moral_identity_internal:moral_circle",]
+  test["Pr(>|t|)"]
+}
+MIiMC <- lapply(summary_lms, ps_MIiMC)
+which(MIiMC<.05)
+
+### moral_identity_internal:political_ideology ###
+ps_MIiPI <- function(x){
+  test <- x$coefficients["moral_identity_internal:political_ideology",]
+  test["Pr(>|t|)"]
+}
+MIiPI <- lapply(summary_lms, ps_MIiPI)
+which(MIiPI<.05)
+
+### moral_identity_symbolic:moral_circle ###
+ps_MIsMC <- function(x){
+  test <- x$coefficients["moral_identity_symbolic:moral_circle",]
+  test["Pr(>|t|)"]
+}
+MIsMC <- lapply(summary_lms, ps_MIsMC)
+which(MIsMC<.05)
+
+### moral_identity_symbolic:political_ideology ###
+ps_MIsPI <- function(x){
+  test <- x$coefficients["moral_identity_symbolic:political_ideology",]
+  test["Pr(>|t|)"]
+}
+MIsPI <- lapply(summary_lms, ps_MIsPI)
+MIsPI[which(MIsPI<.05)]
+
+
+
+
+
+
+```
+
+
+# Shared Document for Preregistration
+
+<iframe width="860" height="1100" src="https://docs.google.com/document/d/1t6oN5rrMxRupFUkY7cTlgaJ0dDBZN34w6WnVVgTuH0w/edit?rm=minimal" frameborder="0"></iframe>
+
+ <a href="https://docs.google.com/document/d/1t6oN5rrMxRupFUkY7cTlgaJ0dDBZN34w6WnVVgTuH0w/edit?usp=sharing" target="_blank">click here to edit in separate window</a> 
+
+
