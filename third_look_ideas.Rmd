@@ -281,7 +281,7 @@ levels(df$country)
 table(df$country)
 
 loop_sort <- function(ppn){
-  cor.plot(z[[ppn]], main = paste(names(z[ppn])))
+  cor.plot(z[[ppn]], las=2, MAR = 8, cex=0.5, main = paste(names(z[ppn])))
 
   }
 
