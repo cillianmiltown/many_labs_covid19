@@ -626,7 +626,7 @@ This model was significant `r apa_lm$full_result$modelfit`.
 
 apa_table(
   apa_lm$table
-  , caption = "Predictors of Policy Support in USA"
+  , caption = "Predictors of Adherence to Physical Contact measures in USA"
 )
 
 ```
@@ -665,7 +665,7 @@ This model was significant `r apa_lm$full_result$modelfit`.
 
 apa_table(
   apa_lm$table
-  , caption = "Predictors of Policy Support in New Zealand"
+  , caption = "Predictors of Adherence to Physical Contact measures in New Zealand"
 )
 
 ```
@@ -887,7 +887,7 @@ This model was significant `r apa_lm$full_result$modelfit`.
 
 apa_table(
   apa_lm$table
-  , caption = "Predictors of Policy Support in USA"
+  , caption = "Predictors of Adherence to Physical Hygiene measures in USA"
 )
 
 ```
@@ -926,7 +926,7 @@ This model was significant `r apa_lm$full_result$modelfit`.
 
 apa_table(
   apa_lm$table
-  , caption = "Predictors of Policy Support in New Zealand"
+  , caption = "Predictors of Adherence to Physical Hygiene measures in New Zealand"
 )
 
 ```
