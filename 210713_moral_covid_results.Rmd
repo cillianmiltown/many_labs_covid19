@@ -1,0 +1,4252 @@
+---
+title: "Moral ID and COVID"
+subtitle: "Results"
+author: "Cillian McHugh"
+date: "13th July 2021"
+bibliography      : "../../Research_general/resources/bib/My Library.bib"
+csl: "../../Research_general/apa.csl"
+output:
+  bookdown::html_document2:
+    fig_caption: yes
+    toc: true
+    toc_float:
+      toc_collapsed: false
+    toc_depth: 4
+    number_sections: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{=html}
+<style type="text/css">
+  .table-container {
+  width: 100%;
+  overflow-x: scroll;
+}
+</style>
+```
+# Introduction
+
+[Introduction is here](https://docs.google.com/document/d/1mDV7E6DE7lUiBEDMDcoaAhFGffB4TgVT1DAzisn6kWE/edit?usp=sharing)
+
+```{r setup, include = FALSE}
+rm(list=ls())
+library(tidyverse)
+library(plyr)
+library(psych)
+library(skimr)
+library(corrplot)
+library(Hmisc)
+#library(psy)
+library(afex)
+#devtools::install_github("cillianmiltown/R_desnum")
+library(desnum)
+library(papaja)
+library(purrr)
+library(interactions)
+library(kableExtra)
+#devtools::install_github("crsh/papaja")
+library("papaja")
+library(lme4)
+library(car)
+library(ggplot2)
+library(nlme)
+library(reshape)
+library(corx)
+library(lsr)
+library(Cairo)
+library(foreign)
+library(ltm)
+
+
+r_refs("r-references.bib")
+```
+
+```{r analysis-preferences, include=FALSE}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(include = FALSE)
+
+#options(bitmapType="cairo")
+
+```
+
+```{r load_data}
+#setwd("../../COVID_19/moral_paper_draft")
+#setwd("../COVID_19/moral_paper_draft")
+
+#source("set_up_data.R")
+load("../many_labs/COVID_manylabs_data_revised.RData")
+# load("../COVID_19/many_labs/COVID_manylabs_data.RData")
+
+World_full_unscaled <- World_full_c
+
+World_full_scaled <- 
+  World_full_c %>% mutate(
+      policy_support_tot = scale(policy_support_tot)
+    , physical_hygiene_tot = scale(physical_hygiene_tot)
+    , physical_contact_tot = scale(physical_contact_tot)
+    , risk_perception_tot = scale(risk_perception_tot)
+    , narcissism_admiration_tot = scale(narcissism_admiration_tot)
+    , narcissism_rivalry_tot = scale(narcissism_rivalry_tot)
+    , collective_narcissism_tot = scale(collective_narcissism_tot)
+    , conspiracy_tot = scale(conspiracy_tot)
+    , national_ID_tot = scale(national_ID_tot)
+    , moral_circle = scale(moral_circle)
+    , moral_identity_internal = scale(moral_identity_internal)
+    , moral_identity_symbolic = scale(moral_identity_symbolic)
+    , political_ideology = scale(political_ideology)
+  )
+
+#world_ful_c <- World_full_scaled
+
+df <- World_full_c
+
+```
+
+# Method
+
+## Participants
+
+A total of sample of *N* = `r length(df$sex)` participants (`r sum(df$sex==1, na.rm=T)`, female, `r sum(df$sex==2, na.rm=T)` male, `r sum(df$sex==3, na.rm=T)` other, *M*~age~ = `r round(mean(df$age,na.rm=T),digits=2)`, min = 18, max = 100, *SD* = `r round(sd(df$age,na.rm=T),digits=2)`), were recruited from `r length(levels(df$country))` countries.
+
+
+```{r}
+df <- World_full_scaled
+df <- df[which(df$country=="USA"|df$country=="NZL"),]
+table(df$country)
+df$country <- droplevels(df$country)
+
+```
+
+
+```{r include = F}
+
+df$Country <- car::recode(df$country, "'USA'='0'; 'NZL'='1'")
+df$Country <- as.numeric(as.character((df$Country)))
+
+nzl <- df[which(df$country=="NZL"),]
+usa <- df[which(df$country=="USA"),]
+
+```
+
+Isolating just the participants in USA and NZL samples, left a total of *N* = `r length(df$sex)` participants (`r sum(df$sex==1, na.rm=T)`, female, `r sum(df$sex==2, na.rm=T)` male, `r sum(df$sex==3, na.rm=T)` other, *M*~age~ = `r round(mean(df$age,na.rm=T),digits=2)`, min = 18, max = 100, *SD* = `r round(sd(df$age,na.rm=T),digits=2)`). The USA sample consisted of *n* = `r length(usa$sex)` participants (`r sum(usa$sex==1, na.rm=T)`, female, `r sum(usa$sex==2, na.rm=T)` male, `r sum(usa$sex==3, na.rm=T)` other, *M*~age~ = `r round(mean(usa$age,na.rm=T),digits=2)`, *SD* = `r round(sd(usa$age,na.rm=T),digits=2)`; and the New Zealand sample consisted of *n* = `r length(nzl$sex)` participants (`r sum(nzl$sex==1, na.rm=T)`, female, `r sum(nzl$sex==2, na.rm=T)` male, `r sum(nzl$sex==3, na.rm=T)` other, *M*~age~ = `r round(mean(nzl$age,na.rm=T),digits=2)`, *SD* = `r round(sd(nzl$age,na.rm=T),digits=2)`.
+
+## Scale Reliabilities
+
+```{r}
+
+df <- World_full_scaled
+df <- df[which(df$country=="USA"|df$country=="NZL"),]
+
+df$Country <- car::recode(df$country, "'USA'='0'; 'NZL'='1'")
+df$Country <- as.numeric(as.character((df$Country)))
+
+nzl <- df[which(df$country=="NZL"),]
+usa <- df[which(df$country=="USA"),]
+
+df1 <- World_full_scaled
+df2 <- df[which(df$country=="USA"|df$country=="NZL"),]
+table(df$country)
+df$country <- droplevels(df$country)
+
+```
+
+
+### Physical Distancing Scale
+
+```{r}
+
+alpha_generic <- function(x){
+  df <- x
+  df$physical_contact__2R <- reverse.code(-1, df$physical_contact__2)
+  
+  y <- subset(df,select=c(
+    physical_contact__1    
+    , physical_contact__2R
+    , physical_contact__3
+    , physical_contact__4
+    , physical_contact__5))
+  cronbach.alpha(y[complete.cases(y),])
+}
+
+```
+
+
+```{r, include=TRUE}
+
+print("Global Sample")
+alpha_generic(df1)
+
+print("USA & NZL")
+alpha_generic(df2)
+
+print("USA")
+alpha_generic(usa)
+
+print("New Zealand")
+alpha_generic(nzl)
+
+```
+
+### Physical Hygiene Scale
+
+```{r}
+
+alpha_generic <- function(x){
+  df <- x
+  
+  y <- subset(df,select=c(
+    physical_hygiene__1
+    , physical_hygiene__2
+    , physical_hygiene__3
+    , physical_hygiene__4
+    , physical_hygiene__5
+  ))
+  
+  cronbach.alpha(y[complete.cases(y),])
+}
+
+```
+
+
+```{r, include=TRUE}
+
+print("Global Sample")
+alpha_generic(df1)
+
+print("USA & NZL")
+alpha_generic(df2)
+
+print("USA")
+alpha_generic(usa)
+
+print("New Zealand")
+alpha_generic(nzl)
+
+```
+
+### Policy Support
+
+```{r}
+
+alpha_generic <- function(x){
+  df <- x
+  
+  y <- subset(df,select=c(
+  policy_support__1
+  , policy_support__2
+  , policy_support__3
+  , policy_support__4
+  , policy_support__5
+))
+  
+  cronbach.alpha(y[complete.cases(y),])
+}
+
+```
+
+
+```{r, include=TRUE}
+
+print("Global Sample")
+alpha_generic(df1)
+
+print("USA & NZL")
+alpha_generic(df2)
+
+print("USA")
+alpha_generic(usa)
+
+print("New Zealand")
+alpha_generic(nzl)
+
+```
+
+
+### Internalised Moral Identity
+
+```{r}
+
+alpha_generic <- function(x){
+  df <- x
+  
+  df$Moral_ID__4R <- reverse.code(c(-1), df$Moral_ID__4)
+  df$Moral_ID__7R <- reverse.code(-1, df$Moral_ID__7)
+  
+  y <- subset(df,select=c(
+    Moral_ID__1
+    , Moral_ID__2
+    , Moral_ID__4R
+    , Moral_ID__7R
+    , Moral_ID__10
+  ))
+  cronbach.alpha(y[complete.cases(y),])
+}
+
+```
+
+
+```{r, include=TRUE}
+
+print("Global Sample")
+alpha_generic(df1)
+
+print("USA & NZL")
+alpha_generic(df2)
+
+print("USA")
+alpha_generic(usa)
+
+print("New Zealand")
+alpha_generic(nzl)
+
+```
+
+
+### Symbolic Moral Identity
+
+```{r}
+
+alpha_generic <- function(x){
+  df <- x
+  y <- subset(df,select=c(
+  Moral_ID__3
+  , Moral_ID__5
+  , Moral_ID__6
+  , Moral_ID__8
+  , Moral_ID__9
+))
+  cronbach.alpha(y[complete.cases(y),])
+}
+
+```
+
+
+```{r, include=TRUE}
+
+print("Global Sample")
+alpha_generic(df1)
+
+print("USA & NZL")
+alpha_generic(df2)
+
+print("USA")
+alpha_generic(usa)
+
+print("New Zealand")
+alpha_generic(nzl)
+
+```
+
+### Risk Perception
+
+```{r}
+
+alpha_generic <- function(x){
+  df <- x
+  df$physical_contact__2R <- reverse.code(-1, df$physical_contact__2)
+  
+  y <- subset(df,select=c(
+    risk_perception__1
+    , risk_perception__2
+  ))
+  
+  cronbach.alpha(y[complete.cases(y),])
+}
+
+```
+
+
+```{r, include=TRUE}
+
+print("Global Sample")
+alpha_generic(df1)
+
+print("USA & NZL")
+alpha_generic(df2)
+
+print("USA")
+alpha_generic(usa)
+
+print("New Zealand")
+alpha_generic(nzl)
+
+```
+
+### Narcissism Admiration
+
+```{r}
+
+alpha_generic <- function(x){
+  df <- x
+  df$physical_contact__2R <- reverse.code(-1, df$physical_contact__2)
+  
+  y <- subset(df,select=c(
+    Narcissism__2
+    , Narcissism__4
+    , Narcissism__5
+  ))
+  
+  cronbach.alpha(y[complete.cases(y),])
+}
+
+```
+
+
+```{r, include=TRUE}
+
+print("Global Sample")
+alpha_generic(df1)
+
+print("USA & NZL")
+alpha_generic(df2)
+
+print("USA")
+alpha_generic(usa)
+
+print("New Zealand")
+alpha_generic(nzl)
+
+```
+
+
+### Narcissism Rivaly
+
+```{r}
+
+alpha_generic <- function(x){
+  df <- x
+  df$physical_contact__2R <- reverse.code(-1, df$physical_contact__2)
+  
+  y <- subset(df,select=c(
+    Narcissism__1
+    , Narcissism__3
+    , Narcissism__6
+  ))
+  
+  cronbach.alpha(y[complete.cases(y),])
+}
+
+```
+
+
+```{r, include=TRUE}
+
+print("Global Sample")
+alpha_generic(df1)
+
+print("USA & NZL")
+alpha_generic(df2)
+
+print("USA")
+alpha_generic(usa)
+
+print("New Zealand")
+alpha_generic(nzl)
+
+```
+
+
+### Collective Narcissism
+
+```{r}
+
+alpha_generic <- function(x){
+  df <- x
+  df$physical_contact__2R <- reverse.code(-1, df$physical_contact__2)
+  
+  y <- subset(df,select=c(
+    collective_narcis__1
+    , collective_narcis__2
+    , collective_narcis__3
+  ))
+  
+  cronbach.alpha(y[complete.cases(y),])
+}
+
+```
+
+
+```{r, include=TRUE}
+
+print("Global Sample")
+alpha_generic(df1)
+
+print("USA & NZL")
+alpha_generic(df2)
+
+print("USA")
+alpha_generic(usa)
+
+print("New Zealand")
+alpha_generic(nzl)
+
+```
+
+
+### Conspiracy Beliefs
+
+```{r}
+
+alpha_generic <- function(x){
+  df <- x
+  df$physical_contact__2R <- reverse.code(-1, df$physical_contact__2)
+  
+  y <- subset(df,select=c(
+    Conspiracy_theories__1
+    , Conspiracy_theories__2
+    , Conspiracy_theories__3
+    , Conspiracy_theories__4
+  ))
+  
+  cronbach.alpha(y[complete.cases(y),])
+}
+
+```
+
+
+```{r, include=TRUE}
+
+print("Global Sample")
+alpha_generic(df1)
+
+print("USA & NZL")
+alpha_generic(df2)
+
+print("USA")
+alpha_generic(usa)
+
+print("New Zealand")
+alpha_generic(nzl)
+
+```
+
+
+
+# Results
+
+
+```{r}
+##### Policy Support #####
+
+df <- World_full_c
+
+df <- df[which(is.na(df$policy_support_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+# df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+# df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+# df <- df[which(is.na(df$moral_circle)==FALSE),]
+# df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+df1 <- df
+df1 <- df1[which(is.na(df1$risk_perception_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_admiration_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_rivalry_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$collective_narcissism_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$conspiracy_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$national_ID_tot)==FALSE),]
+
+# Andy Field's book p. 878
+
+# start building the model
+## first test if country should be included
+
+# no country
+interceptOnly <-gls(policy_support_tot ~ 1
+                    , data = df
+                    , method = "ML"
+                    , na.action = na.exclude)
+summary(interceptOnly)
+
+# country included
+randomInterceptOnly <-lme(policy_support_tot ~ 1
+                          , data = df
+                          , random = ~1|country
+                          , method = "ML"
+                          , na.action = na.exclude)
+summary(randomInterceptOnly)
+
+LL_d <- logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
+aov <- anova(interceptOnly, randomInterceptOnly)
+country_p <- aov$`p-value`[2]
+
+
+
+```
+
+
+Initial testing revealed that for Policy Support, allowing intercepts to vary with Country significantly improved the predictive power of the model $\chi$^2^(`r round(aov$df[2]-aov$df[1], digits=2)`) = `r round(aov$L.Ratio[2],digits=2)`, *p* `r paste(p_report(country_p))`.
+
+
+```{r}
+##### Policy Support #####
+
+df <- World_full_c
+
+df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+# df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+# df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+# df <- df[which(is.na(df$moral_circle)==FALSE),]
+# df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+df1 <- df
+df1 <- df1[which(is.na(df1$risk_perception_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_admiration_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_rivalry_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$collective_narcissism_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$conspiracy_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$national_ID_tot)==FALSE),]
+
+# Andy Field's book p. 878
+# start building the model
+## first test if country should be included
+
+# no country
+interceptOnly <-gls(physical_contact_tot ~ 1
+                    , data = df
+                    , method = "ML"
+                    , na.action = na.exclude)
+summary(interceptOnly)
+
+# country included
+randomInterceptOnly <-lme(physical_contact_tot ~ 1
+                          , data = df
+                          , random = ~1|country
+                          , method = "ML"
+                          , na.action = na.exclude)
+summary(randomInterceptOnly)
+
+
+LL_d <- logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
+aov <- anova(interceptOnly, randomInterceptOnly)
+country_p <- aov$`p-value`[2]
+
+
+
+```
+
+Similarly, for Physical Contact, allowing intercepts to vary with Country significantly improved the predictive power of the model $\chi$^2^(`r round(aov$df[2]-aov$df[1], digits=2)`) = `r round(aov$L.Ratio[2],digits=2)`, *p* `r paste(p_report(country_p))`.
+
+
+```{r}
+##### Policy Support #####
+
+df <- World_full_c
+
+df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+# df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+# df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+# df <- df[which(is.na(df$moral_circle)==FALSE),]
+# df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+
+df1 <- df
+df1 <- df1[which(is.na(df1$risk_perception_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_admiration_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_rivalry_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$collective_narcissism_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$conspiracy_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$national_ID_tot)==FALSE),]
+# Andy Field's book p. 878
+# start building the model
+## first test if country should be included
+
+# no country
+interceptOnly <-gls(physical_hygiene_tot ~ 1
+                    , data = df
+                    , method = "ML"
+                    , na.action = na.exclude)
+summary(interceptOnly)
+
+# country included
+randomInterceptOnly <-lme(physical_hygiene_tot ~ 1
+                          , data = df
+                          , random = ~1|country
+                          , method = "ML"
+                          , na.action = na.exclude)
+summary(randomInterceptOnly)
+
+# check the log likelihoods:
+# (smaller is a better fit)
+logLik(interceptOnly)*-2
+logLik(randomInterceptOnly)*-2
+logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
+LL_d <- logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
+
+# including country looks like a better fit
+# is it significant?
+aov <- anova(interceptOnly, randomInterceptOnly)
+aov$L.Ratio[2]
+country_p <- aov$`p-value`[2]
+aov$df[2]-aov$df[1]
+
+```
+Finally, for Physical Hygiene, allowing intercepts to vary with Country significantly improved the predictive power of the model $\chi$^2^(`r round(aov$df[2]-aov$df[1], digits=2)`) = `r round(aov$L.Ratio[2],digits=2)`, *p* `r paste(p_report(country_p))`. The country level residuals for the full models for each dependent variable are plotted in the Supplementary Analysis.
+
+## Testing Differences Between USA and NZL
+
+```{r}
+df <- World_full_unscaled
+df <- df[which(df$country=="USA"|df$country=="NZL"),]
+table(df$country)
+df$country <- droplevels(df$country)
+
+df$sex2 <- dplyr::recode(df$sex
+                           , "1"="1"
+                           , "2"="0"
+                           , "3"="NA")
+df$sex3 <- dplyr::recode(df$sex
+                           , "1"="female"
+                           , "2"="male"
+                           , "3"="other")
+
+
+df$Country <- car::recode(df$country, "'USA'='0'; 'NZL'='1'")
+df$Country <- as.numeric(as.character((df$Country)))
+
+nzl <- df[which(df$country=="NZL"),]
+usa <- df[which(df$country=="USA"),]
+
+#We have included sex as a control variable in our analyses. The number of participants who selected "other" across both samples was too low to be able to draw meaningful inferences (a total of five participants across both samples, four in the USA and only 1 in New Zealand). For this reason we focus only on males and females coding males as "0", females as "1" to include sex as predictor in our regression models.
+```
+
+In the analysis that follows we focus only on the USA and New Zealand samples (*N* = `r length(df$sex)`).  We have only reported effects for the variables of interest (Moral Circle, Moral Identity Internalization, Symbolic Moral Identity, Political Ideology, and Country), however the values reported are taken from the full model including relevant covariates, all the full regression tables are reported in the supplementary analysis.
+
+
+## Basic Associations
+
+```{r}
+
+
+
+y <- World_full_unscaled %>% dplyr::select(
+            policy_support_tot
+          , physical_contact_tot
+          , physical_hygiene_tot
+          , moral_circle
+          , moral_identity_internal
+          , moral_identity_symbolic
+          , political_ideology
+            )
+
+z <- as.data.frame(sapply(y, as.numeric))
+
+test <- corx(z,
+          triangle = "lower",
+          stars = c(0.05, 0.01, 0.001),
+          describe = c(`$M$` = mean, `$SD$` = sd))
+
+test <- as.data.frame(test)
+
+names(test)[names(test)=="$M$"] <- "*M*"
+names(test)[names(test)=="$SD$"] <- "SD"
+
+names(test)[7:8] <- text_spec(names(test)[7:8], format="html", italic=TRUE)
+
+rownames(test) <- c(
+   "Policy Support"
+  ,"Physical Contact"
+  ,"Physical Hygiene"
+  ,"Moral Circle"
+  ,"Moral Identity Internal"
+  ,"Moral Identity Symbolic"
+  ,"Political Ideology"
+)
+
+```
+
+```{r correlationsAllInterest, include=TRUE}
+
+apa_table(
+  test
+  , caption = "Basic Corrleations total sample"
+)
+
+```
+
+
+```{r}
+
+y <- usa %>% dplyr::select(
+            policy_support_tot
+          , physical_contact_tot
+          , physical_hygiene_tot
+          , moral_circle
+          , moral_identity_internal
+          , moral_identity_symbolic
+          , political_ideology
+            )
+
+z <- as.data.frame(sapply(y, as.numeric))
+
+test <- corx(z,
+          triangle = "lower",
+          stars = c(0.05, 0.01, 0.001),
+          describe = c(`$M$` = mean, `$SD$` = sd))
+
+test <- as.data.frame(test)
+
+names(test)[names(test)=="$M$"] <- "M"
+names(test)[names(test)=="$SD$"] <- "SD"
+
+names(test)[7:8] <- text_spec(names(test)[7:8], format="html", italic=TRUE)
+
+rownames(test) <- c(
+   "Policy Support"
+  ,"Physical Contact"
+  ,"Physical Hygiene"
+  ,"Moral Circle"
+  ,"Moral Identity Internal"
+  ,"Moral Identity Symbolic"
+  ,"Political Ideology"
+)
+```
+
+```{r correlationsUSAInterest, include=TRUE}
+
+apa_table(
+  test
+  , caption = "Basic Correlations (USA sample)"
+)
+
+```
+
+
+
+```{r}
+
+
+y <- nzl %>% dplyr::select(
+            policy_support_tot
+          , physical_contact_tot
+          , physical_hygiene_tot
+          , moral_circle
+          , moral_identity_internal
+          , moral_identity_symbolic
+          , political_ideology
+            )
+
+z <- as.data.frame(sapply(y, as.numeric))
+
+test <- corx(z,
+          triangle = "lower",
+          stars = c(0.05, 0.01, 0.001),
+          describe = c(`$M$` = mean, `$SD$` = sd))
+
+test <- as.data.frame(test)
+
+names(test)[names(test)=="$M$"] <- "M"
+names(test)[names(test)=="$SD$"] <- "SD"
+
+names(test)[7:8] <- text_spec(names(test)[7:8], format="html", italic=TRUE)
+
+
+rownames(test) <- c(
+   "Policy Support"
+  ,"Physical Contact"
+  ,"Physical Hygiene"
+  ,"Moral Circle"
+  ,"Moral Identity Internal"
+  ,"Moral Identity Symbolic"
+  ,"Political Ideology"
+)
+```
+
+```{r correlationsNZLIinterest, include=TRUE}
+
+apa_table(
+  test
+  , caption = "Basic Correlations (New Zealand sample)"
+)
+
+```
+
+
+```{r}
+
+y <- df %>% dplyr::select(
+            country
+          , policy_support_tot
+          , physical_contact_tot
+          , physical_hygiene_tot
+          , age
+          , risk_perception_tot            
+          , narcissism_admiration_tot
+          , narcissism_rivalry_tot
+          , collective_narcissism_tot
+          , conspiracy_tot
+          , national_ID_tot
+          , moral_circle
+          , moral_identity_internal
+          , moral_identity_symbolic
+          , political_ideology
+            )
+
+z <- as.data.frame(sapply(y, as.numeric))
+
+```
+
+```{r}
+
+p_report_star <- 
+  function (b) {
+    e <- round(b, digits = 3)
+    if (b < 0.001) 
+      paste0("<", " ", ".001","**")
+    else if (b < .05)
+      paste0(sub("^(-?)0.", "\\1.", sprintf("%.3f",e)),"*")
+    else paste0(sub("^(-?)0.", "\\1.", sprintf("%.3f",e)))
+  }
+
+
+
+
+t_test_table_fun <- function(p,q){
+  t <- t.test(p~q)
+  #p_value <- p_report_star(t$p.value)
+  vector <- 
+    c(round(mean(p[which(q=="USA")],na.rm=T),digits=2)
+      ,round(sd(p[which(q=="USA")],na.rm=T),digits=2)
+      ,round(mean(p[which(q=="NZL")],na.rm=T),digits=2)
+      ,round(sd(p[which(q=="NZL")],na.rm=T),digits=2)
+      ,round(t$statistic,digits = 2)
+      ,round(t$parameter,digits = 2)
+      ,p_report_star(t$p.value)
+      ,round(cohensD(p~q),digits=2)
+      )
+  
+  headings <- c("*M*-~USA~","*SD*-~USA~","*M*-~NZL~","*SD*-~NZL~","*t*","df","*p*", "*d*")
+  `colnames<-`(
+  rbind.data.frame(headings,vector),
+  headings)[2,]
+}
+
+
+
+test <- rbind.data.frame(
+    `rownames<-`(t_test_table_fun(y$policy_support_tot,y$country),"Policy Support")
+  , `rownames<-`(t_test_table_fun(y$physical_contact_tot,y$country),"Physical Contact")
+  , `rownames<-`(t_test_table_fun(y$physical_hygiene_tot,y$country),"Physical Hygiene")
+  # , `rownames<-`(t_test_table_fun(y$age,y$country),"Age")
+  # , `rownames<-`(t_test_table_fun(y$risk_perception_tot,y$country),"Risk Perception")
+  # , `rownames<-`(t_test_table_fun(y$narcissism_admiration_tot,y$country),"Narcissism Admiration")
+  # , `rownames<-`(t_test_table_fun(y$narcissism_rivalry_tot,y$country),"Narcissism Rivalry")
+  # , `rownames<-`(t_test_table_fun(y$conspiracy_tot,y$country),"Conspiracy Beliefs")
+  # , `rownames<-`(t_test_table_fun(y$national_ID_tot,y$country),"National Identification")
+  , `rownames<-`(t_test_table_fun(y$moral_circle,y$country),"Moral Circle")
+  , `rownames<-`(t_test_table_fun(y$moral_identity_internal,y$country),"Moral ID Internalization")
+  , `rownames<-`(t_test_table_fun(y$moral_identity_symbolic,y$country),"Symbolic Moral ID")
+  , `rownames<-`(t_test_table_fun(y$political_ideology,y$country),"Political Ideology")
+
+  )
+
+test
+```
+
+```{r ttestInterest, include=TRUE}
+
+apa_table(
+  test
+  , caption = "Means Standard Deviations and Differences between the Samples"
+)
+
+```
+
+
+# Policy Support
+
+
+```{r}
+df <- World_full_scaled
+df <- df[which(df$country=="USA"|df$country=="NZL"),]
+table(df$country)
+df$country <- droplevels(df$country)
+
+df$sex2 <- dplyr::recode(df$sex
+                           , "1"="1"
+                           , "2"="0"
+                           , "3"="NA")
+df$sex3 <- dplyr::recode(df$sex
+                           , "1"="female"
+                           , "2"="male"
+                           , "3"="other")
+
+
+df$Country <- car::recode(df$country, "'USA'='0'; 'NZL'='1'")
+df$Country <- as.numeric(as.character((df$Country)))
+
+nzl <- df[which(df$country=="NZL"),]
+usa <- df[which(df$country=="USA"),]
+
+#We have included sex as a control variable in our analyses. The number of participants who selected "other" across both samples was too low to be able to draw meaningful inferences (a total of five participants across both samples, four in the USA and only 1 in New Zealand). For this reason we focus only on males and females coding males as "0", females as "1" to include sex as predictor in our regression models.
+```
+
+```{r}
+
+df <- df[which(is.na(df$policy_support_tot)==FALSE),]
+df <- df[which(is.na(df$age)==FALSE),]
+df <- df[which(is.na(df$sex)==FALSE),]
+
+#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+df <- df[which(is.na(df$moral_circle)==FALSE),]
+df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+```
+
+#### Without Country
+
+```{r include = F}
+
+fit1 <- lm(
+  policy_support_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = df)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+
+```
+
+
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle"),])
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle"),])
+
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal"),])
+c3 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Political ideology"),])
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+
+First we conducted regression for all variables across the full dataset (without accounting for Country). This model was significant *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`. Of the variables of interest, Moral Circle *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`, Internalized Moral Identity , *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`, and Political Ideology , *b* = `r c3$estimate`, `r label(c3$ci)` = `r c3$ci`, *t*(`r round(b$fstatistic[3])`) = `r c3$statistic`, *p* = `r c3$p.value`, were significant predictors in the model. Furthermore, there was a significant interaction between Political Ideology and both Internalized Moral Identity,  *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value`, and Symbolic Moral Identity,  *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* `r c5$p.value`.
+
+#### With Country
+
+```{r regressionfull, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Policy Support (without Country)"
+)
+
+```
+
+
+```{r}
+
+# df$country2 <- dplyr::recode(df$country,
+#                              "USA"="1",
+#                              "NZL"="0")
+# df$country2
+# 
+# as.numeric(df$country)
+
+fit2 <- lm(policy_support_tot ~ country * (age
+                                          + sex3
+                                          + risk_perception_tot
+                                          + narcissism_admiration_tot
+                                          + narcissism_rivalry_tot
+                                          + collective_narcissism_tot
+                                          + conspiracy_tot
+                                          + national_ID_tot
+                                          + # add predictors
+                                          + moral_circle
+                                          + moral_identity_internal
+                                          + moral_identity_symbolic
+                                          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)), data = df)
+
+summary(fit2)
+
+apa_lm <- apa_print(fit2)
+
+
+a <- anova(fit1,fit2)
+
+
+a$Df[2]
+a$Res.Df[2]
+a$F
+p <- a$`Pr(>F)`[2]
+
+
+apa_lm$table$p.value[29]
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                ,"CountryUSA"="Country"
+                ,"Sex3male"="Sex - Male/Female"
+                ,"Sex3other"="Sex - Other/Female"
+                ,"Risk perception tot"="Risk Perception"
+                ,"Narcissism admiration tot"="Narcissism Admiration"
+                ,"Narcissism rivalry tot"="Narcissism Rivalry"
+                ,"Collective narcissism tot"="Collective Narcissism"
+                ,"Conspiracy tot"="Conspiracy Beliefs"
+                ,"National ID tot"="National Identification"
+                ,"CountryUSA $\\times$ Age"= "Country $\\times$ Age"
+                ,"CountryUSA $\\times$ Sex3male"="Country $\\times$ Sex - Male/Female"
+                ,"CountryUSA $\\times$ Sex3other"="Country $\\times$ Sex - Other/Female"
+                ,"CountryUSA $\\times$ Risk perception tot"="Country $\\times$ Risk perception"
+                ,"CountryUSA $\\times$ Narcissism admiration tot"="Country $\\times$ Narcissism admiration"
+                ,"CountryUSA $\\times$ Narcissism rivalry tot"="Country $\\times$ Narcissism rivalry"
+                ,"CountryUSA $\\times$ Collective narcissism tot"="Country $\\times$ Collective narcissism"
+                ,"CountryUSA $\\times$ Conspiracy tot"="Country $\\times$ Conspiracy"
+                ,"CountryUSA $\\times$ National ID tot"="Country $\\times$ National ID"
+                ,"CountryUSA $\\times$ Moral circle"="Country $\\times$ Moral circle"
+                ,"CountryUSA $\\times$ Moral identity internal"="Country $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral identity symbolic"="Country $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Political ideology"="Country $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity internal"="Country $\\times$ Moral circle $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity symbolic"="Country $\\times$ Moral circle $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Moral identity internal $\\times$ Political ideology"="Country $\\times$ Moral identity internal $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral identity symbolic $\\times$ Political ideology"="Country $\\times$ Moral identity symbolic $\\times$ Political ideology")
+
+
+```
+
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity internal"),])
+
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Political ideology"),])
+c3 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity internal $\\times$ Political ideology"),])
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit2)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+Next we added Country as an interaction term. Again the model was significant *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`. And the model performed significantly better than the previous model *F*(`r round(a$Df[2], digits=2)`, `r round(a$Res.Df[2], digits=2)`) = `r round(a$F[2], digits =2)`, *p* `r paste(p_report(p))`. 
+
+With the inclusion of Country as an interaction term the effects described above were no longer observed. Instead we found a significant Country &#215; Internalized Moral Identity interaction, *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; and a significant Country &#215; Political Ideology interaction, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`.
+
+Most importantly, we found a significant three way Country &#215; Internalized Moral Identity &#215; Political Ideology interaction, *b* = `r c3$estimate`, `r label(c3$ci)` = `r c3$ci`, *t*(`r round(b$fstatistic[3])`) = `r c3$statistic`, *p* = `r c3$p.value`.
+
+```{r, include=FALSE}
+apa_lm$table[which(apa_lm$table$predictor=="Age"),]
+c <- apa_lm$table[29,]
+c$estimate
+
+as.character(c[1])
+
+```
+
+
+```{r interactionfull, include=FALSE}
+
+apa_table(
+  c
+  , caption = "3 way interaction"
+)
+
+```
+
+```{r regression2full, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Policy Support (with Country)"
+)
+
+```
+
+
+```{r}
+
+interaction_fun <- function(x){
+  case_when(x > mean(x,na.rm=T)+sd(x,na.rm=T) ~ "1conservative/right",
+            x < mean(x,na.rm=T)+sd(x,na.rm=T) & x > mean(x,na.rm=T)-sd(x,na.rm=T) ~ "2moderate/centre",
+            x < mean(x,na.rm=T)-sd(x,na.rm=T) ~ "3liberal/left")
+}
+
+
+df <-
+  df %>%
+  dplyr::group_by(country) %>%
+  dplyr::mutate(political_ideology_3groups = interaction_fun(political_ideology)
+                , national_pi_mean = mean(political_ideology)
+                , national_pi_sd = sd(political_ideology))
+
+```
+
+
+
+#### USA Regression
+
+```{r}
+fit1 <- lm(
+  policy_support_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = usa)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+```
+
+
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle"),])
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal"),])
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Political ideology"),])
+
+c3 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+
+
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle"),])
+
+c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+
+To interpret these interactions we conducted regressions for the USA and New Zealand samples separately. For the USA sample, the overall model significantly predicted Policy Support *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`, with both Internalised Moral Identity, *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`, and Political Ideology, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`, significantly predicting Policy Support in the USA sample. Importantly the predicted Internalized Moral Identity &#215; Political Ideology interaction was observed *b* = `r c3$estimate`, `r label(c3$ci)` = `r c3$ci`, *t*(`r round(b$fstatistic[3])`) = `r c3$statistic`, *p* = `r c3$p.value`.
+
+We note that in the USA Sample Moral Circle was also a significant predictor *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value`; furthermore we also observed a significant Symbolic Moral Identity &#215; Political Ideology interaction,  *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* `r c5$p.value`.
+
+
+```{r usaregression1full, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Policy Support in USA"
+)
+
+```
+
+
+#### New Zealand Regression
+
+```{r}
+fit1 <- lm(
+  policy_support_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = nzl)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+```
+
+
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle"),])
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal"),])
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Political ideology"),])
+
+c3 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+
+
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle"),])
+
+c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+For the New Zealand sample, the overall model significantly predicted Policy Support *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`, however, the predictive power of the model lay only with the covariates. Neither Internalised Moral Identity, *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`, nor Political Ideology, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`, were significant predictors of Policy Support in the New Zealand sample when controlling for the covariates. The Internalized Moral Identity &#215; Political Ideology interaction was not observed *b* = `r c3$estimate`, `r label(c3$ci)` = `r c3$ci`, *t*(`r round(b$fstatistic[3])`) = `r c3$statistic`, *p* = `r c3$p.value`.
+
+We note that also that Moral Circle was not a significant predictor *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value`; and we observed no significant Symbolic Moral Identity &#215; Political Ideology interaction,  *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* `r c5$p.value`.
+
+```{r nzlregression1full, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Policy Support in New Zealand"
+)
+
+```
+
+
+#### Plot
+
+Figure \@ref(fig:policyMIsNZLUSA1full) shows the relationship between Political Ideology and Internal Moral Identity in predicting Policy Support for the New Zealand sample and the USA sample separately.
+
+```{r policyMIsNZLUSA1full, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Policy Support", include=TRUE, message=FALSE, fig.height=3}
+df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
+g <- ggplot(df1, aes(moral_identity_internal, policy_support_tot, linetype =political_ideology_3groups))+
+  geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
+  #ylim(0,12) +
+  geom_smooth(method=lm, size = .5, color="black") +
+  labs(y = "Policy Support",
+       x = "Internal Moral Identity",
+       linetype = "Political Ideology"
+       )+
+  theme_apa()+
+  scale_linetype_manual(values = c("longdash", "solid", "dotted"),
+                    labels=c("Conservative",
+                           "Moderate",
+                           "Liberal"))+
+  facet_wrap(df1$country)+
+  theme_bw()+
+  theme(plot.title=element_text(family="Arial",
+                                size=12
+                                )
+        , legend.text=element_text(family="Arial",
+                                 size=8
+                                 )
+        , legend.title=element_text(family="Arial",
+                                    size=10
+                                    )
+        , axis.text=element_text(family="Arial",
+                                 colour = "black",
+                                 size=8
+                                 )
+        , axis.ticks.x = element_blank()
+        , axis.title=element_text(family="Arial",
+                                  size=12
+                                  )
+        , strip.text=element_text(family = "Arial",
+                                  size = 12
+                                  )
+        , strip.background = element_rect(fill = NA, size = 1,
+                                           colour = "white"
+                                          )
+        , panel.border = element_blank()
+        , axis.line.x = element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , axis.line.y = # element_blank()
+          element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , legend.position="right"
+        , panel.spacing = unit(2, "lines")
+        )
+
+suppressWarnings(print(g))
+  
+```
+
+# Physical Contact
+```{r}
+
+#df <- df[which(is.na(df$policy_support_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+df <- df[which(is.na(df$moral_circle)==FALSE),]
+df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+```
+
+#### Without Country
+
+```{r include = F}
+
+fit1 <- lm(
+  physical_contact_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = df)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+
+
+```
+
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal"),])
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Political ideology"),])
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+c3 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle $\\times$ Moral identity symbolic"),])
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+As with Policy Support, we conducted regression for all variables across the full dataset (without accounting for Country), and this model was significant *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`. Internalized Moral Identiy was a significant predictor in the model *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; while Political Ideology was not a significant predictor, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`. We found a significant interaction between Political Ideology and both Internalized Moral Identity,  *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value`, and Symbolic Moral Identity,  *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* `r c5$p.value`. Interestingly we also observed a significant Moral Circle &#215; Internalized Moral Identity Interaction *b* = `r c3$estimate`, `r label(c3$ci)` = `r c3$ci`, *t*(`r round(b$fstatistic[3])`) = `r c3$statistic`, *p* `r c3$p.value`.
+
+```{r regression3full, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Physical Contact (without Country)"
+)
+
+```
+
+
+```{r}
+
+fit2 <- lm(physical_contact_tot ~ Country * (age
+                                          + sex3
+                                          + risk_perception_tot
+                                          + narcissism_admiration_tot
+                                          + narcissism_rivalry_tot
+                                          + collective_narcissism_tot
+                                          + conspiracy_tot
+                                          + national_ID_tot
+                                          + # add predictors
+                                          + moral_circle
+                                          + moral_identity_internal
+                                          + moral_identity_symbolic
+                                          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)), data = df)
+
+summary(fit2)
+
+apa_lm <- apa_print(fit2)
+
+
+a <- anova(fit1,fit2)
+
+
+a$Df[2]
+a$Res.Df[2]
+a$F
+p <- a$`Pr(>F)`[2]
+
+
+apa_lm$table$p.value[29]
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                ,"CountryUSA"="Country"
+                ,"Sex3male"="Sex - Male/Female"
+                ,"Sex3other"="Sex - Other/Female"
+                ,"Risk perception tot"="Risk Perception"
+                ,"Narcissism admiration tot"="Narcissism Admiration"
+                ,"Narcissism rivalry tot"="Narcissism Rivalry"
+                ,"Collective narcissism tot"="Collective Narcissism"
+                ,"Conspiracy tot"="Conspiracy Beliefs"
+                ,"National ID tot"="National Identification"
+                ,"CountryUSA $\\times$ Age"= "Country $\\times$ Age"
+                ,"CountryUSA $\\times$ Sex3male"="Country $\\times$ Sex - Male/Female"
+                ,"CountryUSA $\\times$ Sex3other"="Country $\\times$ Sex - Other/Female"
+                ,"CountryUSA $\\times$ Risk perception tot"="Country $\\times$ Risk perception"
+                ,"CountryUSA $\\times$ Narcissism admiration tot"="Country $\\times$ Narcissism admiration"
+                ,"CountryUSA $\\times$ Narcissism rivalry tot"="Country $\\times$ Narcissism rivalry"
+                ,"CountryUSA $\\times$ Collective narcissism tot"="Country $\\times$ Collective narcissism"
+                ,"CountryUSA $\\times$ Conspiracy tot"="Country $\\times$ Conspiracy"
+                ,"CountryUSA $\\times$ National ID tot"="Country $\\times$ National ID"
+                ,"CountryUSA $\\times$ Moral circle"="Country $\\times$ Moral circle"
+                ,"CountryUSA $\\times$ Moral identity internal"="Country $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral identity symbolic"="Country $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Political ideology"="Country $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity internal"="Country $\\times$ Moral circle $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity symbolic"="Country $\\times$ Moral circle $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Moral identity internal $\\times$ Political ideology"="Country $\\times$ Moral identity internal $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral identity symbolic $\\times$ Political ideology"="Country $\\times$ Moral identity symbolic $\\times$ Political ideology")
+
+
+
+```
+
+
+
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal"),])
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Political ideology"),])
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+#c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle $\\times$ Moral identity symbolic"),])
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+
+#### With Country
+
+When we added Country as an interaction term the model remained significant *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`, and performed significantly better than the previous model *F*(`r round(a$Df[2], digits=2)`, `r round(a$Res.Df[2], digits=2)`) = `r round(a$F[2], digits =2)`, *p* `r paste(p_report(p))`. 
+
+Internalized Moral Identiy remained a significant predictor in the model *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; and Political Ideology emerged as a significant predictor, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`. We found a significant interaction between Political Ideology and both Internalized Moral Identity,  *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value`, and Symbolic Moral Identity,  *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* `r c5$p.value`.
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity internal"),])
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Political ideology"),])
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+#c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity internal $\\times$ Political ideology"),])
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+
+Regarding interactions with Country, we found a significant Country &#215; Internalized Moral Identiy interaction *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; and a significant Country &#215; Political Ideology interaction, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`.
+
+We also observed a significant three way Country &#215; Internalized Moral Identiy &#215; Political Ideology interaction *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* `r c5$p.value`.
+
+```{r, include=FALSE}
+
+c <- apa_lm$table[29,]
+
+```
+
+
+```{r interaction2full, include=FALSE}
+
+apa_table(
+  c
+  , caption = "3 way interaction"
+)
+
+```
+
+```{r regression4full, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Physical Contact (with Country)"
+)
+
+```
+
+
+```{r}
+
+interaction_fun <- function(x){
+  case_when(x > mean(x,na.rm=T)+sd(x,na.rm=T) ~ "1conservative/right",
+            x < mean(x,na.rm=T)+sd(x,na.rm=T) & x > mean(x,na.rm=T)-sd(x,na.rm=T) ~ "2moderate/centre",
+            x < mean(x,na.rm=T)-sd(x,na.rm=T) ~ "3liberal/left")
+}
+
+
+df <-
+  df %>%
+  dplyr::group_by(country) %>%
+  dplyr::mutate(political_ideology_3groups = interaction_fun(political_ideology)
+                , national_pi_mean = mean(political_ideology)
+                , national_pi_sd = sd(political_ideology))
+
+```
+
+
+#### USA Regression
+
+```{r}
+fit1 <- lm(
+  physical_contact_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = usa)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+
+```
+
+
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle"),])
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal"),])
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Political ideology"),])
+
+c3 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle $\\times$ Moral identity symbolic"),])
+
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+
+Again we conducted regressions for the USA and New Zealand samples separately. For the USA sample, the overall model significantly predicted adherence to Physical Contact measures *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`, with both Internalised Moral Identity, *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`, and Political Ideology, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`, significantly predicting adherence to Physical Contact measures in the USA sample. Importantly the predicted Internalized Moral Identity &#215; Political Ideology interaction was observed *b* = `r c3$estimate`, `r label(c3$ci)` = `r c3$ci`, *t*(`r round(b$fstatistic[3])`) = `r c3$statistic`, *p* = `r c3$p.value`.
+
+We note that in the USA we also observed a significant Symbolic Moral Identity &#215; Political Ideology interaction *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value`; and a significant Moral Circle &#215; Symbolic Moral Identity interaction,  *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* `r c5$p.value`.
+
+```{r usaregression2full, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Adherence to Physical Contact measures in USA"
+)
+
+```
+
+
+#### New Zealand Regression
+
+```{r}
+
+fit1 <- lm(
+  physical_contact_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = nzl)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+
+```
+
+
+```{r nzlregression2full, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Adherence to Physical Contact measures in New Zealand"
+)
+
+```
+
+
+```{r}
+
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle"),])
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal"),])
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Political ideology"),])
+
+c3 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle $\\times$ Moral identity symbolic"),])
+
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+For the New Zealand sample, the overall model significantly predicted adherence to Physical Contact measures *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`, however, as with Policy Support, the predictive power of the model lay only with the covariates. Neither Internalized Moral Identity, *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`, nor Political Ideology, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`, were significant predictors of adherence to Physical Contact measures in the New Zealand sample when controlling for the covariates. The Internalized Moral Identity &#215; Political Ideology interaction was not observed *b* = `r c3$estimate`, `r label(c3$ci)` = `r c3$ci`, *t*(`r round(b$fstatistic[3])`) = `r c3$statistic`, *p* = `r c3$p.value`.
+
+We note that also that a significant Symbolic Moral Identity &#215; Political Ideology interaction was not observed *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value`; nor did we find a
+a significant significant Moral Circle &#215; Symbolic Moral Identity interaction,  *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* `r c5$p.value`.
+
+
+#### Plot
+
+Figure \@ref(fig:contactMIsNZLUSA1full) shows the relationship between Political Ideology and Internal Moral Identity in predicting Physical Contact for the New Zealand sample and the USA sample separately.
+
+```{r contactMIsNZLUSA1full, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Physical Contact", include=TRUE, message=FALSE, fig.height=3}
+df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
+g <- ggplot(df1, aes(moral_identity_internal, physical_contact_tot, linetype =political_ideology_3groups))+
+  geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
+  #ylim(0,12) +
+  geom_smooth(method=lm, size = .5, color="black") +
+  labs(y = "Physical Contact",
+       x = "Internal Moral Identity",
+       linetype = "Political Ideology"
+       )+
+  theme_apa()+
+  scale_linetype_manual(values = c("longdash", "solid", "dotted"),
+                    labels=c("Conservative",
+                           "Moderate",
+                           "Liberal"))+
+  facet_wrap(df1$country)+
+  theme_bw()+
+  theme(plot.title=element_text(family="Arial",
+                                size=12
+                                )
+        , legend.text=element_text(family="Arial",
+                                 size=8
+                                 )
+        , legend.title=element_text(family="Arial",
+                                    size=10
+                                    )
+        , axis.text=element_text(family="Arial",
+                                 colour = "black",
+                                 size=8
+                                 )
+        , axis.ticks.x = element_blank()
+        , axis.title=element_text(family="Arial",
+                                  size=12
+                                  )
+        , strip.text=element_text(family = "Arial",
+                                  size = 12
+                                  )
+        , strip.background = element_rect(fill = NA, size = 1,
+                                           colour = "white"
+                                          )
+        , panel.border = element_blank()
+        , axis.line.x = element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , axis.line.y = # element_blank()
+          element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , legend.position="right"
+        , panel.spacing = unit(2, "lines")
+        )
+
+suppressWarnings(print(g))
+  
+```
+
+
+# Physical Hygiene
+```{r}
+
+#df <- df[which(is.na(df$policy_support_tot)==FALSE),]
+df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+df <- df[which(is.na(df$moral_circle)==FALSE),]
+df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+```
+
+#### Without Country
+
+```{r include = F}
+fit1 <- lm(
+  physical_hygiene_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = df)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+
+```
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal"),])
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic"),])
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+#c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+#c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle $\\times$ Moral identity symbolic"),])
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+In line with the previous analyses, we conducted regression for all variables across the full dataset (without accounting for Country), and this model was significant *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`. Internalized Moral Identity was a significant predictor in the model *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; as was Symbolic Moral Identity, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`. We also found a significant interaction between Political Ideology and Internalized Moral Identity,  *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value`.
+
+```{r regression5full, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Physical Hygiene (without Country)"
+)
+
+```
+
+
+```{r}
+
+fit2 <- lm(physical_hygiene_tot ~ Country * (age
+                                          + sex3
+                                          + risk_perception_tot
+                                          + narcissism_admiration_tot
+                                          + narcissism_rivalry_tot
+                                          + collective_narcissism_tot
+                                          + conspiracy_tot
+                                          + national_ID_tot
+                                          + # add predictors
+                                          + moral_circle
+                                          + moral_identity_internal
+                                          + moral_identity_symbolic
+                                          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)), data = df)
+
+summary(fit2)
+
+apa_lm <- apa_print(fit2)
+
+
+a <- anova(fit1,fit2)
+
+
+a$Df[2]
+a$Res.Df[2]
+a$F
+p <- a$`Pr(>F)`[2]
+
+
+apa_lm$table$p.value[29]
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                ,"CountryUSA"="Country"
+                ,"Sex3male"="Sex - Male/Female"
+                ,"Sex3other"="Sex - Other/Female"
+                ,"Risk perception tot"="Risk Perception"
+                ,"Narcissism admiration tot"="Narcissism Admiration"
+                ,"Narcissism rivalry tot"="Narcissism Rivalry"
+                ,"Collective narcissism tot"="Collective Narcissism"
+                ,"Conspiracy tot"="Conspiracy Beliefs"
+                ,"National ID tot"="National Identification"
+                ,"CountryUSA $\\times$ Age"= "Country $\\times$ Age"
+                ,"CountryUSA $\\times$ Sex3male"="Country $\\times$ Sex - Male/Female"
+                ,"CountryUSA $\\times$ Sex3other"="Country $\\times$ Sex - Other/Female"
+                ,"CountryUSA $\\times$ Risk perception tot"="Country $\\times$ Risk perception"
+                ,"CountryUSA $\\times$ Narcissism admiration tot"="Country $\\times$ Narcissism admiration"
+                ,"CountryUSA $\\times$ Narcissism rivalry tot"="Country $\\times$ Narcissism rivalry"
+                ,"CountryUSA $\\times$ Collective narcissism tot"="Country $\\times$ Collective narcissism"
+                ,"CountryUSA $\\times$ Conspiracy tot"="Country $\\times$ Conspiracy"
+                ,"CountryUSA $\\times$ National ID tot"="Country $\\times$ National ID"
+                ,"CountryUSA $\\times$ Moral circle"="Country $\\times$ Moral circle"
+                ,"CountryUSA $\\times$ Moral identity internal"="Country $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral identity symbolic"="Country $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Political ideology"="Country $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity internal"="Country $\\times$ Moral circle $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity symbolic"="Country $\\times$ Moral circle $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Moral identity internal $\\times$ Political ideology"="Country $\\times$ Moral identity internal $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral identity symbolic $\\times$ Political ideology"="Country $\\times$ Moral identity symbolic $\\times$ Political ideology")
+
+
+
+```
+
+#### With Country
+
+Again we added Country as an interaction term, and the model remained significant *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`, however the inclusion of Country as an interaction term did not significantly improve the model *F*(`r round(a$Df[2], digits=2)`, `r round(a$Res.Df[2], digits=2)`) = `r round(a$F[2], digits =2)`, *p* `r paste(p_report(p))`. 
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal"),])
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic"),])
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+#c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+#c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle $\\times$ Moral identity symbolic"),])
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+Both Internalized Moral Identity was a significant predictor in the model *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; as was Symbolic Moral Identity, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`, remained significant predictors in the model, and the significant interaction between Political Ideology and Internalized Moral Identity,  *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value` remained. There were no additional effects involving the variables of interest.
+
+
+
+```{r regression6full, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Physical Hygiene (with Country)"
+)
+
+```
+
+
+
+#### USA Regression
+
+```{r}
+fit1 <- lm(
+  physical_hygiene_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = usa)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+```
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal"),])
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic"),])
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+#c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+#c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle $\\times$ Moral identity symbolic"),])
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+For consistency, we conducted regressions for the USA and New Zealand samples separately. For the USA sample, the overall model significantly predicted adherence to Physical Hygiene measures *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`
+
+Both Internalized Moral Identity was a significant predictor in the model *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; as was Symbolic Moral Identity, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`, were significant predictors in the model, and the significant interaction between Political Ideology and Internalized Moral Identity,  *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value` was also present. 
+
+
+```{r usaregression3full, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Adherence to Physical Hygiene measures in USA"
+)
+
+```
+
+
+#### New Zealand Regression
+
+```{r}
+fit1 <- lm(
+  physical_hygiene_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = nzl)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+```
+
+
+```{r}
+
+ci_fun <- function(x){
+  x$ci <- gsub("\\$", "", x$ci)
+  x
+}
+
+
+
+c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal"),])
+c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic"),])
+
+c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
+#c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+#c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral circle $\\times$ Moral identity symbolic"),])
+
+#apa_lm$full_result$moral_circle
+
+b <- summary(fit1)
+
+p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2)
+
+
+```
+
+For the New Zealand sample, the overall model was also significant *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`
+
+Internalized Moral Identity was a significant predictor in the model *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; while was Symbolic Moral Identity was not a significant predictor in the model, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`. The significant interaction between Political Ideology and Internalized Moral Identity was observed,  *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value` remained.
+
+
+```{r nzlregression3full, include=FALSE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Adherence to Physical Hygiene measures in New Zealand"
+)
+
+```
+
+
+```{r}
+
+interaction_fun <- function(x){
+  case_when(x > mean(x,na.rm=T)+sd(x,na.rm=T) ~ "1conservative/right",
+            x < mean(x,na.rm=T)+sd(x,na.rm=T) & x > mean(x,na.rm=T)-sd(x,na.rm=T) ~ "2moderate/centre",
+            x < mean(x,na.rm=T)-sd(x,na.rm=T) ~ "3liberal/left")
+}
+
+
+df <-
+  df %>%
+  dplyr::group_by(country) %>%
+  dplyr::mutate(political_ideology_3groups = interaction_fun(political_ideology)
+                , national_pi_mean = mean(political_ideology)
+                , national_pi_sd = sd(political_ideology))
+
+```
+
+#### Plot
+
+Figure \@ref(fig:hygieneMIsNZLUSA1full) shows the relationship between Political Ideology and Internal Moral Identity in predicting Physical Hygiene for the New Zealand sample and the USA sample separately (note that these effects are equivalent).
+
+```{r hygieneMIsNZLUSA1full, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Physical Hygiene", include=TRUE, message=FALSE, fig.height=3}
+df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
+g <- ggplot(df1, aes(moral_identity_internal, physical_hygiene_tot, linetype =political_ideology_3groups))+
+  geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
+  #ylim(0,12) +
+  geom_smooth(method=lm, size = .5, color="black") +
+  labs(y = "Physical Hygiene",
+       x = "Internal Moral Identity",
+       linetype = "Political Ideology"
+       )+
+  theme_apa()+
+  scale_linetype_manual(values = c("longdash", "solid", "dotted"),
+                    labels=c("Conservative",
+                           "Moderate",
+                           "Liberal"))+
+  facet_wrap(df1$country)+
+  theme_bw()+
+  theme(plot.title=element_text(family="Arial",
+                                size=12
+                                )
+        , legend.text=element_text(family="Arial",
+                                 size=8
+                                 )
+        , legend.title=element_text(family="Arial",
+                                    size=10
+                                    )
+        , axis.text=element_text(family="Arial",
+                                 colour = "black",
+                                 size=8
+                                 )
+        , axis.ticks.x = element_blank()
+        , axis.title=element_text(family="Arial",
+                                  size=12
+                                  )
+        , strip.text=element_text(family = "Arial",
+                                  size = 12
+                                  )
+        , strip.background = element_rect(fill = NA, size = 1,
+                                           colour = "white"
+                                          )
+        , panel.border = element_blank()
+        , axis.line.x = element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , axis.line.y = # element_blank()
+          element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , legend.position="right"
+        , panel.spacing = unit(2, "lines")
+        )
+
+suppressWarnings(print(g))
+  
+``` 
+
+# Supplementary Analysis
+## Residual Plots
+### Policy Support Residuals
+
+```{r}
+
+df <- World_full_c
+
+nullmodel <- lmer(policy_support_tot
+                  ~ risk_perception_tot
+                  + narcissism_admiration_tot
+                  + narcissism_rivalry_tot
+                  + collective_narcissism_tot
+                  + conspiracy_tot
+                  + national_ID_tot
+                  ### add predictors
+                  + moral_identity_internal
+                  + moral_identity_symbolic
+                  + moral_circle
+                  + political_ideology
+                  ### add interactions
+                  + (moral_identity_internal + moral_identity_symbolic) * (moral_circle+political_ideology)
+                  + (1|country), data = df, REML = FALSE)
+
+summary(nullmodel)
+
+rm(labels)
+
+
+u0 <- ranef(nullmodel, condVar = TRUE) 
+u0se <- sqrt(attr(u0[[1]], "postVar")[1, , ])
+
+countries <- (rownames(u0[[1]]))
+u0tab <- cbind(countries, u0[[1]], u0se)
+colnames(u0tab) <- c("countries", "u0", "u0se")
+
+u0tab <- u0tab[order(u0tab$u0), ]
+u0tab <- cbind(u0tab, c(1:dim(u0tab)[1]))
+colnames(u0tab)[4] <- "u0rank"
+u0tab
+
+
+labels_p <- as.vector((u0tab$countries))
+breaks_p <- as.numeric(u0tab$u0rank)
+```
+
+```{r}
+
+g <- ggplot(u0tab,aes(u0,as.numeric(u0rank)#, color=countries
+                 )
+       )+
+  geom_point(size=.5
+  )+
+  labs(y = "Country",
+       x = "Residuals"
+  )+
+  geom_errorbar(
+    aes(xmin=u0-u0se, xmax=u0+u0se), width=.5
+  )+
+  geom_vline(xintercept = 0, linetype="dashed"
+  )+
+  scale_y_continuous("Country",breaks= 1:length(breaks_p)
+                     ,labels = labels_p
+                     ,sec.axis = dup_axis()
+                     )+
+  theme_bw()+
+  theme(
+    panel.grid.minor.y = element_blank()
+    ,panel.grid.major.y = element_line()
+    ,
+    plot.title=element_text(#family="Times",
+                                size=12
+                                ),
+        legend.text=element_text(#family="Times",
+                                 size=6
+                                 ),
+          legend.title=element_text(#family="Times",
+                                    size=10
+                                    ),
+          axis.text=element_text(#family="Times",
+                                 colour = "black",
+                                 size=6
+                                 ),
+          axis.ticks.x = element_blank(),
+          axis.title=element_text(#family="Times",
+                                  size=12
+                                  ),
+          strip.text=element_text(#family = "Times",
+                                  size = 12
+                                  ),
+          strip.background = element_rect(fill = "white"),
+          legend.position="right")#+
+  theme_apa(
+  )+
+  theme(
+  )
+```
+
+```{r residualplot1, fig.cap="Residuals by Country, predicting Policy Support", include=TRUE, fig.height = 6}
+
+suppressWarnings(print(g))
+
+```
+
+\newpage
+
+### Physical Contact Residuals
+
+```{r}
+
+df <- World_full_c
+
+nullmodel <- lmer(physical_contact_tot
+                  ~ risk_perception_tot
+                  + narcissism_admiration_tot
+                  + narcissism_rivalry_tot
+                  + collective_narcissism_tot
+                  + conspiracy_tot
+                  + national_ID_tot
+                  ### add predictors
+                  + moral_identity_internal
+                  + moral_identity_symbolic
+                  + moral_circle
+                  + political_ideology
+                  ### add interactions
+                  + (moral_identity_internal + moral_identity_symbolic) * (moral_circle+political_ideology)
+                  + (1|country), data = df, REML = FALSE)
+
+summary(nullmodel)
+
+rm(labels)
+
+
+u0 <- ranef(nullmodel, condVar = TRUE) 
+u0se <- sqrt(attr(u0[[1]], "postVar")[1, , ])
+
+countries <- (rownames(u0[[1]]))
+u0tab <- cbind(countries, u0[[1]], u0se)
+colnames(u0tab) <- c("countries", "u0", "u0se")
+
+u0tab <- u0tab[order(u0tab$u0), ]
+u0tab <- cbind(u0tab, c(1:dim(u0tab)[1]))
+colnames(u0tab)[4] <- "u0rank"
+u0tab
+
+
+labels_p <- as.vector((u0tab$countries))
+breaks_p <- as.numeric(u0tab$u0rank)
+```
+
+```{r}
+
+g <- ggplot(u0tab,aes(u0,as.numeric(u0rank)#, color=countries
+                 )
+       )+
+  geom_point(size=.5
+  )+
+  labs(y = "Country",
+       x = "Residuals"
+  )+
+  geom_errorbar(
+    aes(xmin=u0-u0se, xmax=u0+u0se), width=.5
+  )+
+  geom_vline(xintercept = 0, linetype="dashed"
+  )+
+  scale_y_continuous("Country",breaks= 1:length(breaks_p)
+                     ,labels = labels_p
+                     ,sec.axis = dup_axis()
+                     )+
+  theme_bw()+
+  theme(
+    panel.grid.minor.y = element_blank()
+    ,panel.grid.major.y = element_line()
+    ,
+    plot.title=element_text(#family="Times",
+                                size=12
+                                ),
+        legend.text=element_text(#family="Times",
+                                 size=6
+                                 ),
+          legend.title=element_text(#family="Times",
+                                    size=10
+                                    ),
+          axis.text=element_text(#family="Times",
+                                 colour = "black",
+                                 size=6
+                                 ),
+          axis.ticks.x = element_blank(),
+          axis.title=element_text(#family="Times",
+                                  size=12
+                                  ),
+          strip.text=element_text(#family = "Times",
+                                  size = 12
+                                  ),
+          strip.background = element_rect(fill = "white"),
+          legend.position="right")#+
+  theme_apa(
+  )+
+  theme(
+  )
+```
+
+```{r residualplot2, fig.cap="Residuals by Country, predicting adherence to Physical Contact Measures", include=TRUE, fig.height = 6}
+
+suppressWarnings(print(g))
+
+```
+
+\newpage 
+
+### Physical Hygiene Residuals
+
+```{r}
+
+df <- World_full_c
+
+nullmodel <- lmer(physical_hygiene_tot
+                  ~ risk_perception_tot
+                  + narcissism_admiration_tot
+                  + narcissism_rivalry_tot
+                  + collective_narcissism_tot
+                  + conspiracy_tot
+                  + national_ID_tot
+                  ### add predictors
+                  + moral_identity_internal
+                  + moral_identity_symbolic
+                  + moral_circle
+                  + political_ideology
+                  ### add interactions
+                  + (moral_identity_internal + moral_identity_symbolic) * (moral_circle+political_ideology)
+                  + (1|country), data = df, REML = FALSE)
+
+summary(nullmodel)
+
+rm(labels)
+
+
+u0 <- ranef(nullmodel, condVar = TRUE) 
+u0se <- sqrt(attr(u0[[1]], "postVar")[1, , ])
+
+countries <- (rownames(u0[[1]]))
+u0tab <- cbind(countries, u0[[1]], u0se)
+colnames(u0tab) <- c("countries", "u0", "u0se")
+
+u0tab <- u0tab[order(u0tab$u0), ]
+u0tab <- cbind(u0tab, c(1:dim(u0tab)[1]))
+colnames(u0tab)[4] <- "u0rank"
+u0tab
+
+
+labels_p <- as.vector((u0tab$countries))
+breaks_p <- as.numeric(u0tab$u0rank)
+```
+
+```{r}
+
+g <- ggplot(u0tab,aes(u0,as.numeric(u0rank)#, color=countries
+                 )
+       )+
+  geom_point(size=.5
+  )+
+  labs(y = "Country",
+       x = "Residuals"
+  )+
+  geom_errorbar(
+    aes(xmin=u0-u0se, xmax=u0+u0se), width=.5
+  )+
+  geom_vline(xintercept = 0, linetype="dashed"
+  )+
+  scale_y_continuous("Country",breaks= 1:length(breaks_p)
+                     ,labels = labels_p
+                     ,sec.axis = dup_axis()
+                     )+
+  theme_bw()+
+  theme(
+    panel.grid.minor.y = element_blank()
+    ,panel.grid.major.y = element_line()
+    ,
+    plot.title=element_text(#family="Times",
+                                size=12
+                                ),
+        legend.text=element_text(#family="Times",
+                                 size=6
+                                 ),
+          legend.title=element_text(#family="Times",
+                                    size=10
+                                    ),
+          axis.text=element_text(#family="Times",
+                                 colour = "black",
+                                 size=6
+                                 ),
+          axis.ticks.x = element_blank(),
+          axis.title=element_text(#family="Times",
+                                  size=12
+                                  ),
+          strip.text=element_text(#family = "Times",
+                                  size = 12
+                                  ),
+          strip.background = element_rect(fill = "white"),
+          legend.position="right")#+
+  theme_apa(
+  )+
+  theme(
+  )
+```
+
+```{r residualplot3, fig.cap="Residuals by Country, predicting adherence to Physical Hygiene Measures", include=TRUE, fig.height = 6}
+
+suppressWarnings(print(g))
+
+```
+
+
+```{r}
+df <- World_full_unscaled
+df <- df[which(df$country=="USA"|df$country=="NZL"),]
+table(df$country)
+df$country <- droplevels(df$country)
+
+```
+
+
+```{r include = F}
+
+df$Country <- car::recode(df$country, "'USA'='0'; 'NZL'='1'")
+df$Country <- as.numeric(as.character((df$Country)))
+
+nzl <- df[which(df$country=="NZL"),]
+usa <- df[which(df$country=="USA"),]
+
+```
+
+
+
+## Basic Associations
+
+
+```{r include = F}
+
+df$Country <- car::recode(df$country, "'USA'='0'; 'NZL'='1'")
+df$Country <- as.numeric(as.character((df$Country)))
+
+df$sex2 <- dplyr::recode(df$sex
+                           , "1"="1"
+                           , "2"="0"
+                           , "3"="NA")
+df$sex3 <- dplyr::recode(df$sex
+                           , "1"="female"
+                           , "2"="male"
+                           , "3"="other")
+
+nzl <- df[which(df$country=="NZL"),]
+usa <- df[which(df$country=="USA"),]
+
+```
+
+
+```{r}
+
+
+y <- World_full_c %>% dplyr::select(
+            policy_support_tot
+          , physical_contact_tot
+          , physical_hygiene_tot
+          , age
+          , risk_perception_tot            
+          , narcissism_admiration_tot
+          , narcissism_rivalry_tot
+          , collective_narcissism_tot
+          , conspiracy_tot
+          , national_ID_tot
+          , moral_circle
+          , moral_identity_internal
+          , moral_identity_symbolic
+          , political_ideology
+            )
+
+z <- as.data.frame(sapply(y, as.numeric))
+
+test <- corx(z,
+          triangle = "lower",
+          stars = c(0.05, 0.01, 0.001),
+          describe = c(`*M*` = mean, `*SD*` = sd))
+
+test <- as.data.frame(test)
+
+rownames(test) <- c(
+   "Policy Support"
+  ,"Physical Contact"
+  ,"Physical Hygiene"
+  ,"Age"
+  ,"Risk Perception"
+  ,"Narcissism Admiration"
+  ,"Narcissism Rivalry"
+  ,"Collective Narcissism"
+  ,"Conspiracy Beliefs"
+  ,"National ID"
+  ,"Moral Circle"
+  ,"Moral Identity Internal"
+  ,"Moral Identity Symbolic"
+  ,"Political Ideology"
+)
+
+
+
+```
+
+```{r correlationsAll, include=TRUE}
+
+apa_table(
+  test
+  , caption = "Basic Corrleations total sample"
+)
+
+```
+
+
+```{r}
+
+
+y <- usa %>% dplyr::select(
+            policy_support_tot
+          , physical_contact_tot
+          , physical_hygiene_tot
+          , age
+          , risk_perception_tot            
+          , narcissism_admiration_tot
+          , narcissism_rivalry_tot
+          , collective_narcissism_tot
+          , conspiracy_tot
+          , national_ID_tot
+          , moral_circle
+          , moral_identity_internal
+          , moral_identity_symbolic
+          , political_ideology
+            )
+
+z <- as.data.frame(sapply(y, as.numeric))
+
+test <- corx(z,
+          triangle = "lower",
+          stars = c(0.05, 0.01, 0.001),
+          describe = c(`*M*` = mean, `*SD*` = sd))
+
+test <- as.data.frame(test)
+
+rownames(test) <- c(
+   "Policy Support"
+  ,"Physical Contact"
+  ,"Physical Hygiene"
+  ,"Age"
+  ,"Risk Perception"
+  ,"Narcissism Admiration"
+  ,"Narcissism Rivalry"
+  ,"Collective Narcissism"
+  ,"Conspiracy Beliefs"
+  ,"National ID"
+  ,"Moral Circle"
+  ,"Moral Identity Internal"
+  ,"Moral Identity Symbolic"
+  ,"Political Ideology"
+)
+```
+
+```{r correlationsUSA, include=TRUE}
+
+apa_table(
+  test
+  , caption = "Basic Correlations (USA sample)"
+)
+
+```
+
+
+
+```{r}
+
+
+y <- nzl %>% dplyr::select(
+            policy_support_tot
+          , physical_contact_tot
+          , physical_hygiene_tot
+          , age
+          , risk_perception_tot            
+          , narcissism_admiration_tot
+          , narcissism_rivalry_tot
+          , collective_narcissism_tot
+          , conspiracy_tot
+          , national_ID_tot
+          , moral_circle
+          , moral_identity_internal
+          , moral_identity_symbolic
+          , political_ideology
+            )
+
+z <- as.data.frame(sapply(y, as.numeric))
+
+test <- corx(z,
+          triangle = "lower",
+          stars = c(0.05, 0.01, 0.001),
+          describe = c(`*M*` = mean, `*SD*` = sd))
+
+test <- as.data.frame(test)
+
+rownames(test) <- c(
+   "Policy Support"
+  ,"Physical Contact"
+  ,"Physical Hygiene"
+  ,"Age"
+  ,"Risk Perception"
+  ,"Narcissism Admiration"
+  ,"Narcissism Rivalry"
+  ,"Collective Narcissism"
+  ,"Conspiracy Beliefs"
+  ,"National ID"
+  ,"Moral Circle"
+  ,"Moral Identity Internal"
+  ,"Moral Identity Symbolic"
+  ,"Political Ideology"
+)
+```
+
+```{r correlationsNZL, include=TRUE}
+
+apa_table(
+  test
+  , caption = "Basic Correlations (New Zealand sample)"
+)
+
+```
+
+```{r}
+
+y <- df %>% dplyr::select(
+            country
+          , policy_support_tot
+          , physical_contact_tot
+          , physical_hygiene_tot
+          , age
+          , risk_perception_tot            
+          , narcissism_admiration_tot
+          , narcissism_rivalry_tot
+          , collective_narcissism_tot
+          , conspiracy_tot
+          , national_ID_tot
+          , moral_circle
+          , moral_identity_internal
+          , moral_identity_symbolic
+          , political_ideology
+            )
+
+z <- as.data.frame(sapply(y, as.numeric))
+
+```
+
+```{r}
+
+
+t_test_table_fun <- function(p,q){
+  
+  p_report_star <- 
+  function (b) {
+    e <- round(b, digits = 3)
+    if (b < 0.001) 
+      paste0("<", " ", ".001","**")
+    else if (b < .05)
+      paste0(sub("^(-?)0.", "\\1.", sprintf("%.3f",e)),"*")
+    else paste0(sub("^(-?)0.", "\\1.", sprintf("%.3f",e)))
+  }
+  
+  t <- t.test(p~q)
+  #p_value <- p_report_star(t$p.value)
+  vector <- 
+    c(round(mean(p[which(q=="USA")],na.rm=T),digits=2)
+      ,round(sd(p[which(q=="USA")],na.rm=T),digits=2)
+      ,round(mean(p[which(q=="NZL")],na.rm=T),digits=2)
+      ,round(sd(p[which(q=="NZL")],na.rm=T),digits=2)
+      ,round(t$statistic,digits = 2)
+      ,round(t$parameter,digits = 2)
+      ,p_report_star(t$p.value)
+      ,round(cohensD(p~q),digits=2)
+      )
+  
+  headings <- c("*M*-~USA~","*SD*-~USA~","*M*-~NZL~","*SD*-~NZL~","*t*","df","*p*", "*d*")
+  `colnames<-`(
+  rbind.data.frame(headings,vector),
+  headings)[2,]
+}
+
+
+
+test <- rbind.data.frame(
+    `rownames<-`(t_test_table_fun(y$policy_support_tot,y$country),"Policy Support")
+  , `rownames<-`(t_test_table_fun(y$physical_contact_tot,y$country),"Physical Contact")
+  , `rownames<-`(t_test_table_fun(y$physical_hygiene_tot,y$country),"Physical Hygiene")
+  , `rownames<-`(t_test_table_fun(y$age,y$country),"Age")
+  , `rownames<-`(t_test_table_fun(y$risk_perception_tot,y$country),"Risk Perception")
+  , `rownames<-`(t_test_table_fun(y$narcissism_admiration_tot,y$country),"Narcissism Admiration")
+  , `rownames<-`(t_test_table_fun(y$narcissism_rivalry_tot,y$country),"Narcissism Rivalry")
+  , `rownames<-`(t_test_table_fun(y$conspiracy_tot,y$country),"Conspiracy Beliefs")
+  , `rownames<-`(t_test_table_fun(y$national_ID_tot,y$country),"National Identification")
+  , `rownames<-`(t_test_table_fun(y$moral_circle,y$country),"Moral Circle")
+  , `rownames<-`(t_test_table_fun(y$moral_identity_internal,y$country),"Moral ID Internalization")
+  , `rownames<-`(t_test_table_fun(y$moral_identity_symbolic,y$country),"Symbolic Moral ID")
+  , `rownames<-`(t_test_table_fun(y$political_ideology,y$country),"Political Ideology")
+
+  )
+
+test
+```
+
+```{r ttestAll, include=TRUE}
+
+apa_table(
+  test
+  , caption = "Means Standard Deviations and Differences between the Samples"
+)
+
+```
+
+
+
+```{r}
+
+y <- df %>% dplyr::select(
+            country
+          , policy_support_tot
+          , physical_contact_tot
+          , physical_hygiene_tot
+          , sex3
+          , age
+          , risk_perception_tot            
+          , narcissism_admiration_tot
+          , narcissism_rivalry_tot
+          , collective_narcissism_tot
+          , conspiracy_tot
+          , national_ID_tot
+          , moral_circle
+          , moral_identity_internal
+          , moral_identity_symbolic
+          , political_ideology
+            )
+
+z <- as.data.frame(sapply(y, as.numeric))
+
+```
+
+```{r}
+
+
+
+anova_table_fun <- function(p,q){
+  p_report_star <- 
+    function (b) {
+      e <- round(b, digits = 3)
+      if (b < 0.001) 
+        paste0("<", " ", ".001","**")
+      else if (b < .05)
+        paste0(sub("^(-?)0.", "\\1.", sprintf("%.3f",e)),"*")
+      else paste0(sub("^(-?)0.", "\\1.", sprintf("%.3f",e)))
+    }
+  
+  df_aov_table <- function (a){
+    aov <- a
+    paste(c(aov[[1]][["Df"]], " ", ",")[c(1, 4, 3, 2)], collapse = "")
+  }
+  
+  F_aov_table <- function (a){
+    aov <- a
+    aov[[1]][["F value"]][1]
+  }
+  
+  p_report_table <- function (b){
+    e <- round(b, digits = 3)
+    if (b < 0.001) 
+      paste0("<", " ", ".001")
+    else paste0(sub("^(-?)0.", "\\1.", sprintf("%.3f", 
+                                                         e)))
+  }
+  
+  aov <- summary(aov(p~q))
+  eta <- (aov[[1]][["Sum Sq"]][1])/((aov[[1]][["Sum Sq"]][1])+(aov[[1]][["Sum Sq"]][2]))
+  
+  vector <- 
+    c(round(mean(p[which(q=="female")],na.rm=T),digits=2)
+      ,round(sd(p[which(q=="female")],na.rm=T),digits=2)
+      ,round(mean(p[which(q=="male")],na.rm=T),digits=2)
+      ,round(sd(p[which(q=="male")],na.rm=T),digits=2)
+      ,round(mean(p[which(q=="other")],na.rm=T),digits=2)
+      ,round(sd(p[which(q=="other")],na.rm=T),digits=2)
+      ,round(F_aov_table(aov),digits = 2)
+      ,df_aov_table(aov)
+      ,p_report_star(aov[[1]][["Pr(>F)"]][1])
+      ,p_report_table(eta)
+      )
+  headings <- c("*M*-~Female~","*SD*-~Female~","*M*-~Male~","*SD*-~Male~","*M*-~Other~","*SD*-~Other~","*F*","df","*p*", "*eta*")
+  `colnames<-`(
+  rbind.data.frame(headings,vector),
+  headings)[2,]
+}
+
+anova_table_fun(y$policy_support_tot,y$sex3)
+
+test <- rbind.data.frame(
+    `rownames<-`(anova_table_fun(y$policy_support_tot,y$sex3),"Policy Support")
+  , `rownames<-`(anova_table_fun(y$physical_contact_tot,y$sex3),"Physical Contact")
+  , `rownames<-`(anova_table_fun(y$physical_hygiene_tot,y$sex3),"Physical Hygiene")
+  , `rownames<-`(anova_table_fun(y$age,y$sex3),"Age")
+  , `rownames<-`(anova_table_fun(y$risk_perception_tot,y$sex3),"Risk Perception")
+  , `rownames<-`(anova_table_fun(y$narcissism_admiration_tot,y$sex3),"Narcissism Admiration")
+  , `rownames<-`(anova_table_fun(y$narcissism_rivalry_tot,y$sex3),"Narcissism Rivalry")
+  , `rownames<-`(anova_table_fun(y$conspiracy_tot,y$sex3),"Conspiracy Beliefs")
+  , `rownames<-`(anova_table_fun(y$national_ID_tot,y$sex3),"National Identification")
+  , `rownames<-`(anova_table_fun(y$moral_circle,y$sex3),"Moral Circle")
+  , `rownames<-`(anova_table_fun(y$moral_identity_internal,y$sex3),"Moral ID Internalization")
+  , `rownames<-`(anova_table_fun(y$moral_identity_symbolic,y$sex3),"Symbolic Moral ID")
+  , `rownames<-`(anova_table_fun(y$political_ideology,y$sex3),"Political Ideology")
+
+  )
+
+test
+```
+
+```{r anovaAll, include=TRUE}
+
+apa_table(
+  test
+  , caption = "Means Standard Deviations and Differences depending on Gender"
+)
+
+```
+
+## Policy Support
+
+
+```{r}
+df <- World_full_unscaled
+df <- df[which(df$country=="USA"|df$country=="NZL"),]
+table(df$country)
+df$country <- droplevels(df$country)
+
+df$sex2 <- dplyr::recode(df$sex
+                           , "1"="1"
+                           , "2"="0"
+                           , "3"="NA")
+df$sex3 <- dplyr::recode(df$sex
+                           , "1"="female"
+                           , "2"="male"
+                           , "3"="other")
+
+
+df$Country <- car::recode(df$country, "'USA'='0'; 'NZL'='1'")
+df$Country <- as.numeric(as.character((df$Country)))
+
+nzl <- df[which(df$country=="NZL"),]
+usa <- df[which(df$country=="USA"),]
+
+#We have included sex as a control variable in our analyses. The number of participants who selected "other" across both samples was too low to be able to draw meaningful inferences (a total of five participants across both samples, four in the USA and only 1 in New Zealand). For this reason we focus only on males and females coding males as "0", females as "1" to include sex as predictor in our regression models.
+```
+```{r}
+
+df <- df[which(is.na(df$policy_support_tot)==FALSE),]
+df <- df[which(is.na(df$age)==FALSE),]
+df <- df[which(is.na(df$sex)==FALSE),]
+#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+df <- df[which(is.na(df$moral_circle)==FALSE),]
+df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+```
+
+### Without Country
+
+```{r include = F}
+
+
+fit1 <- lm(
+  policy_support_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = df)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+
+```
+
+First I ran a regression for all variables across the full dataset (without accounting for Country). This model was significant `r apa_lm$full_result$modelfit`.
+
+```{r regression, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Policy Support (without Country)"
+)
+
+```
+
+
+```{r}
+
+fit2 <- lm(policy_support_tot ~ country * (age
+                                          + sex3
+                                          + risk_perception_tot
+                                          + narcissism_admiration_tot
+                                          + narcissism_rivalry_tot
+                                          + collective_narcissism_tot
+                                          + conspiracy_tot
+                                          + national_ID_tot
+                                          + # add predictors
+                                          + moral_circle
+                                          + moral_identity_internal
+                                          + moral_identity_symbolic
+                                          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)), data = df)
+
+summary(fit2)
+
+apa_lm <- apa_print(fit2)
+
+
+a <- anova(fit1,fit2)
+
+
+a$Df[2]
+a$Res.Df[2]
+a$F
+p <- a$`Pr(>F)`[2]
+
+
+apa_lm$table$p.value[29]
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                ,"CountryUSA"="Country"
+                ,"Sex3male"="Sex - Male/Female"
+                ,"Sex3other"="Sex - Other/Female"
+                ,"Risk perception tot"="Risk Perception"
+                ,"Narcissism admiration tot"="Narcissism Admiration"
+                ,"Narcissism rivalry tot"="Narcissism Rivalry"
+                ,"Collective narcissism tot"="Collective Narcissism"
+                ,"Conspiracy tot"="Conspiracy Beliefs"
+                ,"National ID tot"="National Identification"
+                ,"CountryUSA $\\times$ Age"= "Country $\\times$ Age"
+                ,"CountryUSA $\\times$ Sex3male"="Country $\\times$ Sex - Male/Female"
+                ,"CountryUSA $\\times$ Sex3other"="Country $\\times$ Sex - Other/Female"
+                ,"CountryUSA $\\times$ Risk perception tot"="Country $\\times$ Risk perception"
+                ,"CountryUSA $\\times$ Narcissism admiration tot"="Country $\\times$ Narcissism admiration"
+                ,"CountryUSA $\\times$ Narcissism rivalry tot"="Country $\\times$ Narcissism rivalry"
+                ,"CountryUSA $\\times$ Collective narcissism tot"="Country $\\times$ Collective narcissism"
+                ,"CountryUSA $\\times$ Conspiracy tot"="Country $\\times$ Conspiracy"
+                ,"CountryUSA $\\times$ National ID tot"="Country $\\times$ National ID"
+                ,"CountryUSA $\\times$ Moral circle"="Country $\\times$ Moral circle"
+                ,"CountryUSA $\\times$ Moral identity internal"="Country $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral identity symbolic"="Country $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Political ideology"="Country $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity internal"="Country $\\times$ Moral circle $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity symbolic"="Country $\\times$ Moral circle $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Moral identity internal $\\times$ Political ideology"="Country $\\times$ Moral identity internal $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral identity symbolic $\\times$ Political ideology"="Country $\\times$ Moral identity symbolic $\\times$ Political ideology")
+
+
+```
+
+### With Country
+
+Next I added Country as an interaction term. Again the model was significant `r apa_lm$full_result$modelfit`. And the model performed significantly better than the previous model *F*(`r round(a$Df[2], digits=2)`, `r round(a$Res.Df[2], digits=2)`) = `r round(a$F[2], digits =2)`, *p* `r paste(p_report(p))`. Most interestingly, the three way interaction between Country, Political Ideology, and Moral Identity Internal is there:
+
+```{r, include=FALSE}
+
+c <- apa_lm$table[29,]
+
+```
+
+
+```{r interaction, include=TRUE}
+
+apa_table(
+  c
+  , caption = "3 way interaction"
+)
+
+```
+
+```{r regression2, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Policy Support (with Country)"
+)
+
+```
+
+
+```{r}
+
+interaction_fun <- function(x){
+  case_when(x > mean(x,na.rm=T)+sd(x,na.rm=T) ~ "1conservative/right",
+            x < mean(x,na.rm=T)+sd(x,na.rm=T) & x > mean(x,na.rm=T)-sd(x,na.rm=T) ~ "2moderate/centre",
+            x < mean(x,na.rm=T)-sd(x,na.rm=T) ~ "3liberal/left")
+}
+
+
+df <-
+  df %>%
+  dplyr::group_by(country) %>%
+  dplyr::mutate(political_ideology_3groups = interaction_fun(political_ideology)
+                , national_pi_mean = mean(political_ideology)
+                , national_pi_sd = sd(political_ideology))
+
+```
+
+### Plot
+
+Figure \@ref(fig:policyMIsNZLUSA1) shows the relationship between Political Ideology and Internal Moral Identity in predicting Policy Support for the New Zealand sample and the USA sample separately.
+
+```{r policyMIsNZLUSA1, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Policy Support", include=TRUE, message=FALSE, fig.height=3}
+df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
+g <- ggplot(df1, aes(moral_identity_internal, policy_support_tot, linetype =political_ideology_3groups))+
+  geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
+  #ylim(0,12) +
+  geom_smooth(method=lm, size = .5, color="black") +
+  labs(y = "Policy Support",
+       x = "Internal Moral Identity",
+       linetype = "Political Ideology"
+       )+
+  theme_apa()+
+  scale_linetype_manual(values = c("longdash", "solid", "dotted"),
+                    labels=c("Conservative",
+                           "Moderate",
+                           "Liberal"))+
+  facet_wrap(df1$country)+
+  theme_bw()+
+  theme(plot.title=element_text(#family="Times",
+                                size=12
+                                )
+        , legend.text=element_text(#family="Times",
+                                 size=8
+                                 )
+        , legend.title=element_text(#family="Times",
+                                    size=10
+                                    )
+        , axis.text=element_text(#family="Times",
+                                 colour = "black",
+                                 size=8
+                                 )
+        , axis.ticks.x = element_blank()
+        , axis.title=element_text(#family="Times",
+                                  size=12
+                                  )
+        , strip.text=element_text(#family = "Times",
+                                  size = 12
+                                  )
+        , strip.background = element_rect(fill = NA, size = 1,
+                                           colour = "white"
+                                          )
+        , panel.border = element_blank()
+        , axis.line.x = element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , axis.line.y = # element_blank()
+          element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , legend.position="right"
+        , panel.spacing = unit(2, "lines")
+        )
+
+suppressWarnings(print(g))
+  
+```
+
+### USA Regression
+
+```{r}
+fit1 <- lm(
+  policy_support_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = usa)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+```
+
+This model was significant `r apa_lm$full_result$modelfit`.
+
+```{r usaregression1, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Policy Support in USA"
+)
+
+```
+
+
+### New Zealand Regression
+
+```{r}
+fit1 <- lm(
+  policy_support_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = nzl)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+```
+
+This model was significant `r apa_lm$full_result$modelfit`.
+
+```{r nzlregression1, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Policy Support in New Zealand"
+)
+
+```
+
+## Physical Contact
+```{r}
+
+#df <- df[which(is.na(df$policy_support_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+df <- df[which(is.na(df$moral_circle)==FALSE),]
+df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+```
+
+### Without Country
+
+```{r include = F}
+fit1 <- lm(
+  physical_contact_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = df)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+# fit1 <- lm(
+#   physical_contact_tot ~
+#             risk_perception_tot
+#           + narcissism_admiration_tot
+#           + narcissism_rivalry_tot
+#           + collective_narcissism_tot
+#           + conspiracy_tot
+#           + national_ID_tot
+#           + # add predictors
+#           + moral_circle
+#           + moral_identity_internal
+#           + moral_identity_symbolic
+#           + political_ideology
+#           + (moral_identity_internal*moral_circle)
+#           + (moral_identity_symbolic*moral_circle)
+#           + (moral_identity_internal*political_ideology)
+#           + (moral_identity_symbolic*political_ideology)
+#           , data = df)
+# summary(fit1)
+# 
+# apa_lm <- apa_print(fit1)
+
+```
+
+First I ran a regression for all variables across the full dataset (without accounting for Country). This model was significant `r apa_lm$full_result$modelfit`.
+
+```{r regression3, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Physical Contact (without Country)"
+)
+
+```
+
+
+```{r}
+
+fit2 <- lm(physical_contact_tot ~ Country * (age
+                                          + sex3
+                                          + risk_perception_tot
+                                          + narcissism_admiration_tot
+                                          + narcissism_rivalry_tot
+                                          + collective_narcissism_tot
+                                          + conspiracy_tot
+                                          + national_ID_tot
+                                          + # add predictors
+                                          + moral_circle
+                                          + moral_identity_internal
+                                          + moral_identity_symbolic
+                                          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)), data = df)
+
+summary(fit2)
+
+apa_lm <- apa_print(fit2)
+
+
+a <- anova(fit1,fit2)
+
+
+a$Df[2]
+a$Res.Df[2]
+a$F
+p <- a$`Pr(>F)`[2]
+
+
+apa_lm$table$p.value[29]
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                ,"CountryUSA"="Country"
+                ,"Sex3male"="Sex - Male/Female"
+                ,"Sex3other"="Sex - Other/Female"
+                ,"Risk perception tot"="Risk Perception"
+                ,"Narcissism admiration tot"="Narcissism Admiration"
+                ,"Narcissism rivalry tot"="Narcissism Rivalry"
+                ,"Collective narcissism tot"="Collective Narcissism"
+                ,"Conspiracy tot"="Conspiracy Beliefs"
+                ,"National ID tot"="National Identification"
+                ,"CountryUSA $\\times$ Age"= "Country $\\times$ Age"
+                ,"CountryUSA $\\times$ Sex3male"="Country $\\times$ Sex - Male/Female"
+                ,"CountryUSA $\\times$ Sex3other"="Country $\\times$ Sex - Other/Female"
+                ,"CountryUSA $\\times$ Risk perception tot"="Country $\\times$ Risk perception"
+                ,"CountryUSA $\\times$ Narcissism admiration tot"="Country $\\times$ Narcissism admiration"
+                ,"CountryUSA $\\times$ Narcissism rivalry tot"="Country $\\times$ Narcissism rivalry"
+                ,"CountryUSA $\\times$ Collective narcissism tot"="Country $\\times$ Collective narcissism"
+                ,"CountryUSA $\\times$ Conspiracy tot"="Country $\\times$ Conspiracy"
+                ,"CountryUSA $\\times$ National ID tot"="Country $\\times$ National ID"
+                ,"CountryUSA $\\times$ Moral circle"="Country $\\times$ Moral circle"
+                ,"CountryUSA $\\times$ Moral identity internal"="Country $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral identity symbolic"="Country $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Political ideology"="Country $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity internal"="Country $\\times$ Moral circle $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity symbolic"="Country $\\times$ Moral circle $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Moral identity internal $\\times$ Political ideology"="Country $\\times$ Moral identity internal $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral identity symbolic $\\times$ Political ideology"="Country $\\times$ Moral identity symbolic $\\times$ Political ideology")
+
+
+```
+
+### With Country
+
+Next I added Country as an interaction term. Again the model was significant `r apa_lm$full_result$modelfit`. And the model performed significantly better than the previous model *F*(`r round(a$Df[2], digits=2)`, `r round(a$Res.Df[2], digits=2)`) = `r round(a$F[2], digits =2)`, *p* `r paste(p_report(p))`. Again a three way interaction was observed.
+
+
+```{r, include=FALSE}
+
+c <- apa_lm$table[29,]
+
+```
+
+
+```{r interaction2, include=TRUE}
+
+apa_table(
+  c
+  , caption = "3 way interaction"
+)
+
+```
+
+```{r regression4, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Physical Contact (with Country)"
+)
+
+```
+
+
+```{r}
+
+interaction_fun <- function(x){
+  case_when(x > mean(x,na.rm=T)+sd(x,na.rm=T) ~ "1conservative/right",
+            x < mean(x,na.rm=T)+sd(x,na.rm=T) & x > mean(x,na.rm=T)-sd(x,na.rm=T) ~ "2moderate/centre",
+            x < mean(x,na.rm=T)-sd(x,na.rm=T) ~ "3liberal/left")
+}
+
+
+df <-
+  df %>%
+  dplyr::group_by(country) %>%
+  dplyr::mutate(political_ideology_3groups = interaction_fun(political_ideology)
+                , national_pi_mean = mean(political_ideology)
+                , national_pi_sd = sd(political_ideology))
+
+```
+
+### Plot
+
+Figure \@ref(fig:contactMIsNZLUSA1) shows the relationship between Political Ideology and Internal Moral Identity in predicting Physical Contact for the New Zealand sample and the USA sample separately.
+
+```{r contactMIsNZLUSA1, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Physical Contact", include=TRUE, message=FALSE, fig.height=3}
+df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
+g <- ggplot(df1, aes(moral_identity_internal, physical_contact_tot, linetype =political_ideology_3groups))+
+  geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
+  #ylim(0,12) +
+  geom_smooth(method=lm, size = .5, color="black") +
+  labs(y = "Physical Contact",
+       x = "Internal Moral Identity",
+       linetype = "Political Ideology"
+       )+
+  theme_apa()+
+  scale_linetype_manual(values = c("longdash", "solid", "dotted"),
+                    labels=c("Conservative",
+                           "Moderate",
+                           "Liberal"))+
+  facet_wrap(df1$country)+
+  theme_bw()+
+  theme(plot.title=element_text(#family="Times",
+                                size=12
+                                )
+        , legend.text=element_text(#family="Times",
+                                 size=8
+                                 )
+        , legend.title=element_text(#family="Times",
+                                    size=10
+                                    )
+        , axis.text=element_text(#family="Times",
+                                 colour = "black",
+                                 size=8
+                                 )
+        , axis.ticks.x = element_blank()
+        , axis.title=element_text(#family="Times",
+                                  size=12
+                                  )
+        , strip.text=element_text(#family = "Times",
+                                  size = 12
+                                  )
+        , strip.background = element_rect(fill = NA, size = 1,
+                                           colour = "white"
+                                          )
+        , panel.border = element_blank()
+        , axis.line.x = element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , axis.line.y = # element_blank()
+          element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , legend.position="right"
+        , panel.spacing = unit(2, "lines")
+        )
+
+suppressWarnings(print(g))
+  
+```
+
+### USA Regression
+
+```{r}
+
+fit1 <- lm(
+  physical_contact_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = usa)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+```
+
+This model was significant `r apa_lm$full_result$modelfit`.
+
+```{r usaregression2, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Adherence to Physical Contact measures in USA"
+)
+
+```
+
+
+### New Zealand Regression
+
+```{r}
+fit1 <- lm(
+  physical_contact_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = nzl)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+```
+
+This model was significant `r apa_lm$full_result$modelfit`.
+
+```{r nzlregression2, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Adherence to Physical Contact measures in New Zealand"
+)
+
+```
+
+
+
+
+
+## Physical Hygiene
+```{r}
+
+#df <- df[which(is.na(df$policy_support_tot)==FALSE),]
+df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+df <- df[which(is.na(df$moral_circle)==FALSE),]
+df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+```
+
+### Without Country
+
+```{r include = F}
+
+fit1 <- lm(
+  physical_hygiene_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = df)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+```
+
+First I ran a regression for all variables across the full dataset (without accounting for Country). This model was significant `r apa_lm$full_result$modelfit`.
+
+```{r regression5, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Physical Hygiene (without Country)"
+)
+
+```
+
+
+```{r}
+
+fit2 <- lm(physical_hygiene_tot ~ country * (age
+                                          + sex3
+                                          + risk_perception_tot
+                                          + narcissism_admiration_tot
+                                          + narcissism_rivalry_tot
+                                          + collective_narcissism_tot
+                                          + conspiracy_tot
+                                          + national_ID_tot
+                                          + # add predictors
+                                          + moral_circle
+                                          + moral_identity_internal
+                                          + moral_identity_symbolic
+                                          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)), data = df)
+
+summary(fit2)
+
+apa_lm <- apa_print(fit2)
+
+
+a <- anova(fit1,fit2)
+
+
+a$Df[2]
+a$Res.Df[2]
+a$F
+p <- a$`Pr(>F)`[2]
+
+
+apa_lm$table$p.value[29]
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                ,"CountryUSA"="Country"
+                ,"Sex3male"="Sex - Male/Female"
+                ,"Sex3other"="Sex - Other/Female"
+                ,"Risk perception tot"="Risk Perception"
+                ,"Narcissism admiration tot"="Narcissism Admiration"
+                ,"Narcissism rivalry tot"="Narcissism Rivalry"
+                ,"Collective narcissism tot"="Collective Narcissism"
+                ,"Conspiracy tot"="Conspiracy Beliefs"
+                ,"National ID tot"="National Identification"
+                ,"CountryUSA $\\times$ Age"= "Country $\\times$ Age"
+                ,"CountryUSA $\\times$ Sex3male"="Country $\\times$ Sex - Male/Female"
+                ,"CountryUSA $\\times$ Sex3other"="Country $\\times$ Sex - Other/Female"
+                ,"CountryUSA $\\times$ Risk perception tot"="Country $\\times$ Risk perception"
+                ,"CountryUSA $\\times$ Narcissism admiration tot"="Country $\\times$ Narcissism admiration"
+                ,"CountryUSA $\\times$ Narcissism rivalry tot"="Country $\\times$ Narcissism rivalry"
+                ,"CountryUSA $\\times$ Collective narcissism tot"="Country $\\times$ Collective narcissism"
+                ,"CountryUSA $\\times$ Conspiracy tot"="Country $\\times$ Conspiracy"
+                ,"CountryUSA $\\times$ National ID tot"="Country $\\times$ National ID"
+                ,"CountryUSA $\\times$ Moral circle"="Country $\\times$ Moral circle"
+                ,"CountryUSA $\\times$ Moral identity internal"="Country $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral identity symbolic"="Country $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Political ideology"="Country $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity internal"="Country $\\times$ Moral circle $\\times$ Moral identity internal"
+                ,"CountryUSA $\\times$ Moral circle $\\times$ Moral identity symbolic"="Country $\\times$ Moral circle $\\times$ Moral identity symbolic"
+                ,"CountryUSA $\\times$ Moral identity internal $\\times$ Political ideology"="Country $\\times$ Moral identity internal $\\times$ Political ideology"
+                ,"CountryUSA $\\times$ Moral identity symbolic $\\times$ Political ideology"="Country $\\times$ Moral identity symbolic $\\times$ Political ideology")
+
+
+
+```
+
+### With Country
+
+Next I added Country as an interaction term. Again the model was significant `r apa_lm$full_result$modelfit`. And the model performed significantly better than the previous model *F*(`r round(a$Df[2], digits=2)`, `r round(a$Res.Df[2], digits=2)`) = `r round(a$F[2], digits =2)`, *p* `r paste(p_report(p))`. No three way interaction this time.
+
+```{r regression6, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Physical Hygiene (with Country)"
+)
+
+```
+
+
+```{r}
+
+interaction_fun <- function(x){
+  case_when(x > mean(x,na.rm=T)+sd(x,na.rm=T) ~ "1conservative/right",
+            x < mean(x,na.rm=T)+sd(x,na.rm=T) & x > mean(x,na.rm=T)-sd(x,na.rm=T) ~ "2moderate/centre",
+            x < mean(x,na.rm=T)-sd(x,na.rm=T) ~ "3liberal/left")
+}
+
+
+df <-
+  df %>%
+  dplyr::group_by(country) %>%
+  dplyr::mutate(political_ideology_3groups = interaction_fun(political_ideology)
+                , national_pi_mean = mean(political_ideology)
+                , national_pi_sd = sd(political_ideology))
+
+```
+
+### Plot
+
+Figure \@ref(fig:hygieneMIsNZLUSA1) shows the relationship between Political Ideology and Internal Moral Identity in predicting Physical Hygiene for the New Zealand sample and the USA sample separately (note that these effects are equivalent).
+
+```{r hygieneMIsNZLUSA1, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Physical Hygiene", include=TRUE, message=FALSE, fig.height=3}
+df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
+g <- ggplot(df1, aes(moral_identity_internal, physical_hygiene_tot, linetype =political_ideology_3groups))+
+  geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
+  #ylim(0,12) +
+  geom_smooth(method=lm, size = .5, color="black") +
+  labs(y = "Physical Hygiene",
+       x = "Internal Moral Identity",
+       linetype = "Political Ideology"
+       )+
+  theme_apa()+
+  scale_linetype_manual(values = c("longdash", "solid", "dotted"),
+                    labels=c("Conservative",
+                           "Moderate",
+                           "Liberal"))+
+  facet_wrap(df1$country)+
+  theme_bw()+
+  theme(plot.title=element_text(#family="Times",
+                                size=12
+                                )
+        , legend.text=element_text(#family="Times",
+                                 size=8
+                                 )
+        , legend.title=element_text(#family="Times",
+                                    size=10
+                                    )
+        , axis.text=element_text(#family="Times",
+                                 colour = "black",
+                                 size=8
+                                 )
+        , axis.ticks.x = element_blank()
+        , axis.title=element_text(#family="Times",
+                                  size=12
+                                  )
+        , strip.text=element_text(#family = "Times",
+                                  size = 12
+                                  )
+        , strip.background = element_rect(fill = NA, size = 1,
+                                           colour = "white"
+                                          )
+        , panel.border = element_blank()
+        , axis.line.x = element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , axis.line.y = # element_blank()
+          element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , legend.position="right"
+        , panel.spacing = unit(2, "lines")
+        )
+
+suppressWarnings(print(g))
+  
+```
+
+### USA Regression
+
+```{r}
+fit1 <- lm(
+  physical_hygiene_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = usa)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+```
+
+This model was significant `r apa_lm$full_result$modelfit`.
+
+```{r usaregression3, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Adherence to Physical Hygiene measures in USA"
+)
+
+```
+
+
+### New Zealand Regression
+
+```{r}
+fit1 <- lm(
+  physical_hygiene_tot ~
+            age
+          + sex3
+          + risk_perception_tot
+          + narcissism_admiration_tot
+          + narcissism_rivalry_tot
+          + collective_narcissism_tot
+          + conspiracy_tot
+          + national_ID_tot
+          + # add predictors
+          + moral_circle
+          + moral_identity_internal
+          + moral_identity_symbolic
+          + political_ideology
+          + (moral_identity_internal*moral_circle)
+          + (moral_identity_symbolic*moral_circle)
+          + (moral_identity_internal*political_ideology)
+          + (moral_identity_symbolic*political_ideology)
+          , data = nzl)
+summary(fit1)
+
+apa_lm <- apa_print(fit1)
+
+apa_lm$table$predictor <-
+  dplyr::recode(apa_lm$table$predictor
+                , "Sex3male"="Sex - Male/Female"
+                , "Sex3other"="Sex - Other/Female"
+                , "Risk perception tot"="Risk Perception"
+                , "Narcissism admiration tot"="Narcissism Admiration"
+                , "Narcissism rivalry tot"="Narcissism Rivalry"
+                , "Collective narcissism tot"="Collective Narcissism"
+                , "Conspiracy tot"="Conspiracy Beliefs"
+                , "National ID tot"="National Identification"
+                )
+
+```
+
+This model was significant `r apa_lm$full_result$modelfit`.
+
+```{r nzlregression3, include=TRUE}
+
+apa_table(
+  apa_lm$table
+  , caption = "Predictors of Adherence to Physical Hygiene measures in New Zealand"
+)
+
+```
+
+
