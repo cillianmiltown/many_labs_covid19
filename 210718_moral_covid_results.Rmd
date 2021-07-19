@@ -2,7 +2,7 @@
 title: "Moral ID and COVID"
 subtitle: "Results"
 author: "Cillian McHugh"
-date: "13th July 2021"
+date: "19th July 2021"
 bibliography      : "../../Research_general/resources/bib/My Library.bib"
 csl: "../../Research_general/apa.csl"
 output:
@@ -529,170 +529,6 @@ alpha_generic(nzl)
 # Results
 
 
-```{r}
-##### Policy Support #####
-
-df <- World_full_c
-
-df <- df[which(is.na(df$policy_support_tot)==FALSE),]
-#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
-#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
-
-# df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
-# df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
-# df <- df[which(is.na(df$moral_circle)==FALSE),]
-# df <- df[which(is.na(df$political_ideology)==FALSE),]
-
-df1 <- df
-df1 <- df1[which(is.na(df1$risk_perception_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$narcissism_admiration_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$narcissism_rivalry_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$collective_narcissism_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$conspiracy_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$national_ID_tot)==FALSE),]
-
-# Andy Field's book p. 878
-
-# start building the model
-## first test if country should be included
-
-# no country
-interceptOnly <-gls(policy_support_tot ~ 1
-                    , data = df
-                    , method = "ML"
-                    , na.action = na.exclude)
-summary(interceptOnly)
-
-# country included
-randomInterceptOnly <-lme(policy_support_tot ~ 1
-                          , data = df
-                          , random = ~1|country
-                          , method = "ML"
-                          , na.action = na.exclude)
-summary(randomInterceptOnly)
-
-LL_d <- logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
-aov <- anova(interceptOnly, randomInterceptOnly)
-country_p <- aov$`p-value`[2]
-
-
-
-```
-
-
-Initial testing revealed that for Policy Support, allowing intercepts to vary with Country significantly improved the predictive power of the model $\chi$^2^(`r round(aov$df[2]-aov$df[1], digits=2)`) = `r round(aov$L.Ratio[2],digits=2)`, *p* `r paste(p_report(country_p))`.
-
-
-```{r}
-##### Policy Support #####
-
-df <- World_full_c
-
-df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
-#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
-#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
-
-# df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
-# df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
-# df <- df[which(is.na(df$moral_circle)==FALSE),]
-# df <- df[which(is.na(df$political_ideology)==FALSE),]
-
-df1 <- df
-df1 <- df1[which(is.na(df1$risk_perception_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$narcissism_admiration_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$narcissism_rivalry_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$collective_narcissism_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$conspiracy_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$national_ID_tot)==FALSE),]
-
-# Andy Field's book p. 878
-# start building the model
-## first test if country should be included
-
-# no country
-interceptOnly <-gls(physical_contact_tot ~ 1
-                    , data = df
-                    , method = "ML"
-                    , na.action = na.exclude)
-summary(interceptOnly)
-
-# country included
-randomInterceptOnly <-lme(physical_contact_tot ~ 1
-                          , data = df
-                          , random = ~1|country
-                          , method = "ML"
-                          , na.action = na.exclude)
-summary(randomInterceptOnly)
-
-
-LL_d <- logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
-aov <- anova(interceptOnly, randomInterceptOnly)
-country_p <- aov$`p-value`[2]
-
-
-
-```
-
-Similarly, for Physical Contact, allowing intercepts to vary with Country significantly improved the predictive power of the model $\chi$^2^(`r round(aov$df[2]-aov$df[1], digits=2)`) = `r round(aov$L.Ratio[2],digits=2)`, *p* `r paste(p_report(country_p))`.
-
-
-```{r}
-##### Policy Support #####
-
-df <- World_full_c
-
-df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
-#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
-#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
-
-# df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
-# df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
-# df <- df[which(is.na(df$moral_circle)==FALSE),]
-# df <- df[which(is.na(df$political_ideology)==FALSE),]
-
-
-df1 <- df
-df1 <- df1[which(is.na(df1$risk_perception_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$narcissism_admiration_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$narcissism_rivalry_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$collective_narcissism_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$conspiracy_tot)==FALSE),]
-df1 <- df1[which(is.na(df1$national_ID_tot)==FALSE),]
-# Andy Field's book p. 878
-# start building the model
-## first test if country should be included
-
-# no country
-interceptOnly <-gls(physical_hygiene_tot ~ 1
-                    , data = df
-                    , method = "ML"
-                    , na.action = na.exclude)
-summary(interceptOnly)
-
-# country included
-randomInterceptOnly <-lme(physical_hygiene_tot ~ 1
-                          , data = df
-                          , random = ~1|country
-                          , method = "ML"
-                          , na.action = na.exclude)
-summary(randomInterceptOnly)
-
-# check the log likelihoods:
-# (smaller is a better fit)
-logLik(interceptOnly)*-2
-logLik(randomInterceptOnly)*-2
-logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
-LL_d <- logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
-
-# including country looks like a better fit
-# is it significant?
-aov <- anova(interceptOnly, randomInterceptOnly)
-aov$L.Ratio[2]
-country_p <- aov$`p-value`[2]
-aov$df[2]-aov$df[1]
-
-```
-Finally, for Physical Hygiene, allowing intercepts to vary with Country significantly improved the predictive power of the model $\chi$^2^(`r round(aov$df[2]-aov$df[1], digits=2)`) = `r round(aov$L.Ratio[2],digits=2)`, *p* `r paste(p_report(country_p))`. The country level residuals for the full models for each dependent variable are plotted in the Supplementary Analysis.
 
 ## Testing Differences Between USA and NZL
 
@@ -1721,7 +1557,7 @@ p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)
 Regarding interactions with Country, we found a significant Country &#215; Internalized Moral Identity interaction *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; a significant Country &#215; Symbolic Moral Identity interaction *b* = `r c6$estimate`, `r label(c6$ci)` = `r c6$ci`, *t*(`r round(b$fstatistic[3])`) = `r c6$statistic`, *p* = `r c6$p.value`;
 and a significant Country &#215; Political Ideology interaction, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`.
 
-We also observed a significant three way Country &#215; Internalized Moral Identiy &#215; Political Ideology interaction *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* = `r c5$p.value`.
+We also observed a significant three way Country &#215; Internalized Moral Identiy &#215; Political Ideology interaction *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* = `r c5$p.value`. Again we conducted regressions for the USA and New Zealand samples separately.
 
 ```{r, include=FALSE}
 
@@ -1840,7 +1676,7 @@ p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)
 ```
 
 
-Again we conducted regressions for the USA and New Zealand samples separately. For the USA sample, the overall model significantly predicted adherence to Physical Contact measures *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`, with both Internalised Moral Identity, *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`, and Political Ideology, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`, significantly predicting adherence to Physical Contact measures in the USA sample. Importantly the predicted Internalized Moral Identity &#215; Political Ideology interaction was observed *b* = `r c3$estimate`, `r label(c3$ci)` = `r c3$ci`, *t*(`r round(b$fstatistic[3])`) = `r c3$statistic`, *p* = `r c3$p.value`.
+For the USA sample, the overall model significantly predicted adherence to Physical Contact measures *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`, with both Internalised Moral Identity, *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`, and Political Ideology, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`, significantly predicting adherence to Physical Contact measures in the USA sample. Importantly the predicted Internalized Moral Identity &#215; Political Ideology interaction was observed *b* = `r c3$estimate`, `r label(c3$ci)` = `r c3$ci`, *t*(`r round(b$fstatistic[3])`) = `r c3$statistic`, *p* = `r c3$p.value`.
 
 We note that in the USA we also observed a significant Symbolic Moral Identity &#215; Political Ideology interaction *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value`; and a significant Moral Circle &#215; Symbolic Moral Identity interaction,  *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* = `r c5$p.value`.
 
@@ -2276,7 +2112,7 @@ p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)
 
 ```
 
-For the USA sample, the overall model significantly predicted adherence to Physical Hygiene measures *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`
+For the USA sample, the overall model significantly predicted adherence to Physical Hygiene measures *R*^2^ = `r round(b$r.squared, digits = 2)`, *F*(`r round(b$fstatistic[2])`, `r round(b$fstatistic[3])`) = `r round(b$fstatistic[1], digits=2)`, *p* `r paste(p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)/2))`.
 
 Internalized Moral Identity was a significant predictor in the model *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; as was Symbolic Moral Identity, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`, and the significant interaction between Political Ideology and Internalized Moral Identity,  *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* `r c4$p.value` was also present. 
 
@@ -2450,6 +2286,172 @@ suppressWarnings(print(g))
 ``` 
 
 # Supplementary Analysis
+
+```{r}
+##### Policy Support #####
+
+df <- World_full_c
+
+df <- df[which(is.na(df$policy_support_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+# df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+# df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+# df <- df[which(is.na(df$moral_circle)==FALSE),]
+# df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+df1 <- df
+df1 <- df1[which(is.na(df1$risk_perception_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_admiration_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_rivalry_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$collective_narcissism_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$conspiracy_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$national_ID_tot)==FALSE),]
+
+# Andy Field's book p. 878
+
+# start building the model
+## first test if country should be included
+
+# no country
+interceptOnly <-gls(policy_support_tot ~ 1
+                    , data = df
+                    , method = "ML"
+                    , na.action = na.exclude)
+summary(interceptOnly)
+
+# country included
+randomInterceptOnly <-lme(policy_support_tot ~ 1
+                          , data = df
+                          , random = ~1|country
+                          , method = "ML"
+                          , na.action = na.exclude)
+summary(randomInterceptOnly)
+
+LL_d <- logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
+aov <- anova(interceptOnly, randomInterceptOnly)
+country_p <- aov$`p-value`[2]
+
+
+
+```
+
+
+Initial testing revealed that for Policy Support, allowing intercepts to vary with Country significantly improved the predictive power of the model $\chi$^2^(`r round(aov$df[2]-aov$df[1], digits=2)`) = `r round(aov$L.Ratio[2],digits=2)`, *p* `r paste(p_report(country_p))`.
+
+
+```{r}
+##### Policy Support #####
+
+df <- World_full_c
+
+df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+# df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+# df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+# df <- df[which(is.na(df$moral_circle)==FALSE),]
+# df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+df1 <- df
+df1 <- df1[which(is.na(df1$risk_perception_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_admiration_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_rivalry_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$collective_narcissism_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$conspiracy_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$national_ID_tot)==FALSE),]
+
+# Andy Field's book p. 878
+# start building the model
+## first test if country should be included
+
+# no country
+interceptOnly <-gls(physical_contact_tot ~ 1
+                    , data = df
+                    , method = "ML"
+                    , na.action = na.exclude)
+summary(interceptOnly)
+
+# country included
+randomInterceptOnly <-lme(physical_contact_tot ~ 1
+                          , data = df
+                          , random = ~1|country
+                          , method = "ML"
+                          , na.action = na.exclude)
+summary(randomInterceptOnly)
+
+
+LL_d <- logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
+aov <- anova(interceptOnly, randomInterceptOnly)
+country_p <- aov$`p-value`[2]
+
+
+
+```
+
+Similarly, for Physical Contact, allowing intercepts to vary with Country significantly improved the predictive power of the model $\chi$^2^(`r round(aov$df[2]-aov$df[1], digits=2)`) = `r round(aov$L.Ratio[2],digits=2)`, *p* `r paste(p_report(country_p))`.
+
+
+```{r}
+##### Policy Support #####
+
+df <- World_full_c
+
+df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_hygiene_tot)==FALSE),]
+#df <- df[which(is.na(df$physical_contact_tot)==FALSE),]
+
+# df <- df[which(is.na(df$moral_identity_internal)==FALSE),]
+# df <- df[which(is.na(df$moral_identity_symbolic)==FALSE),]
+# df <- df[which(is.na(df$moral_circle)==FALSE),]
+# df <- df[which(is.na(df$political_ideology)==FALSE),]
+
+
+df1 <- df
+df1 <- df1[which(is.na(df1$risk_perception_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_admiration_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$narcissism_rivalry_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$collective_narcissism_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$conspiracy_tot)==FALSE),]
+df1 <- df1[which(is.na(df1$national_ID_tot)==FALSE),]
+# Andy Field's book p. 878
+# start building the model
+## first test if country should be included
+
+# no country
+interceptOnly <-gls(physical_hygiene_tot ~ 1
+                    , data = df
+                    , method = "ML"
+                    , na.action = na.exclude)
+summary(interceptOnly)
+
+# country included
+randomInterceptOnly <-lme(physical_hygiene_tot ~ 1
+                          , data = df
+                          , random = ~1|country
+                          , method = "ML"
+                          , na.action = na.exclude)
+summary(randomInterceptOnly)
+
+# check the log likelihoods:
+# (smaller is a better fit)
+logLik(interceptOnly)*-2
+logLik(randomInterceptOnly)*-2
+logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
+LL_d <- logLik(interceptOnly)*-2 - logLik(randomInterceptOnly)*-2
+
+# including country looks like a better fit
+# is it significant?
+aov <- anova(interceptOnly, randomInterceptOnly)
+aov$L.Ratio[2]
+country_p <- aov$`p-value`[2]
+aov$df[2]-aov$df[1]
+
+```
+Finally, for Physical Hygiene, allowing intercepts to vary with Country significantly improved the predictive power of the model $\chi$^2^(`r round(aov$df[2]-aov$df[1], digits=2)`) = `r round(aov$L.Ratio[2],digits=2)`, *p* `r paste(p_report(country_p))`. The country level residuals for the full models for each dependent variable are plotted below.
+
 ## Residual Plots
 ### Policy Support Residuals
 
