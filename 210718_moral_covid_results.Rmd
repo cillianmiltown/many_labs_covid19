@@ -27,7 +27,7 @@ editor_options:
 ```
 # Introduction
 
-[Introduction is here](https://docs.google.com/document/d/1mDV7E6DE7lUiBEDMDcoaAhFGffB4TgVT1DAzisn6kWE/edit?usp=sharing)
+[Introduction, methods and neater results are here](https://docs.google.com/document/d/1Bgq1LWJxxFoBtVKamhJo_mPNqaFRpinQSUwtb8zzh10/edit?usp=sharing)
 
 ```{r setup, include = FALSE}
 rm(list=ls())
