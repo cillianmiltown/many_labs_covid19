@@ -580,7 +580,7 @@ z <- as.data.frame(sapply(y, as.numeric))
 
 test <- corx(z,
           triangle = "lower",
-          stars = c(0.05, 0.01, 0.001),
+          stars = c(0.05, 0.001),
           describe = c(`$M$` = mean, `$SD$` = sd))
 
 test <- as.data.frame(test)
@@ -628,7 +628,7 @@ z <- as.data.frame(sapply(y, as.numeric))
 
 test <- corx(z,
           triangle = "lower",
-          stars = c(0.05, 0.01, 0.001),
+          stars = c(0.05, 0.001),
           describe = c(`$M$` = mean, `$SD$` = sd))
 
 test <- as.data.frame(test)
@@ -677,7 +677,7 @@ z <- as.data.frame(sapply(y, as.numeric))
 
 test <- corx(z,
           triangle = "lower",
-          stars = c(0.05, 0.01, 0.001),
+          stars = c(0.05, 0.001),
           describe = c(`$M$` = mean, `$SD$` = sd))
 
 test <- as.data.frame(test)
@@ -1021,10 +1021,14 @@ ci_fun <- function(x){
 c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity internal"),])
 
 c2 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Political ideology"),])
-c1 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity internal $\\times$ Political ideology"),])
+c3 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity internal $\\times$ Political ideology"),])
 
 c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal $\\times$ Political ideology"),])
 c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity symbolic $\\times$ Political ideology"),])
+
+
+c7 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity symbolic $\\times$ Political ideology"),])
+
 
 #apa_lm$full_result$moral_circle
 
@@ -1039,7 +1043,7 @@ Next we added Country as an interaction term. Again the model was significant *R
 
 With the inclusion of Country as an interaction term many of the effects described above were no longer observed, however we did find a significant Country &#215; Political Ideology interaction, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`.
 
-Most importantly, we found a significant three way Country &#215; Internalized Moral Identity &#215; Political Ideology interaction, *b* = `r c3$estimate`, `r label(c3$ci)` = `r c3$ci`, *t*(`r round(b$fstatistic[3])`) = `r c3$statistic`, *p* = `r c3$p.value`. To interpret these interactions we conducted regressions for the USA and New Zealand samples separately. 
+Most importantly, we found a significant three way Country &#215; Internalized Moral Identity &#215; Political Ideology interaction, *b* = `r c3$estimate`, `r label(c3$ci)` = `r c3$ci`, *t*(`r round(b$fstatistic[3])`) = `r c3$statistic`, *p* = `r c3$p.value`; this was not observed for Symbolization  *b* = `r c7$estimate`, `r label(c7$ci)` = `r c7$ci`, *t*(`r round(b$fstatistic[3])`) = `r c7$statistic`, *p* = `r c7$p.value`. To interpret these interactions we conducted regressions for the USA and New Zealand samples separately. 
 
 ```{r, include=FALSE}
 apa_lm$table[which(apa_lm$table$predictor=="Age"),]
@@ -1544,6 +1548,10 @@ c4 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Moral identity internal
 
 c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity internal $\\times$ Political ideology"),])
 
+
+
+c7 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity symbolic $\\times$ Political ideology"),])
+
 #apa_lm$full_result$moral_circle
 
 b <- summary(fit1)
@@ -1557,7 +1565,7 @@ p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)
 Regarding interactions with Country, we found a significant Country &#215; Internalized Moral Identity interaction *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; a significant Country &#215; Symbolic Moral Identity interaction *b* = `r c6$estimate`, `r label(c6$ci)` = `r c6$ci`, *t*(`r round(b$fstatistic[3])`) = `r c6$statistic`, *p* = `r c6$p.value`;
 and a significant Country &#215; Political Ideology interaction, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`.
 
-We also observed a significant three way Country &#215; Internalized Moral Identiy &#215; Political Ideology interaction *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* = `r c5$p.value`. Again we conducted regressions for the USA and New Zealand samples separately.
+We also observed a significant three way Country &#215; Internalized Moral Identiy &#215; Political Ideology interaction *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* = `r c5$p.value`; this was not observed for Symbolization  *b* = `r c7$estimate`, `r label(c7$ci)` = `r c7$ci`, *t*(`r round(b$fstatistic[3])`) = `r c7$statistic`, *p* = `r c7$p.value`. Again we conducted regressions for the USA and New Zealand samples separately.
 
 ```{r, include=FALSE}
 
@@ -2033,6 +2041,18 @@ p_report(pf(b$fstatistic[1],b$fstatistic[2],b$fstatistic[3], lower.tail = FALSE)
 
 Internalized Moral Identity was a significant predictor in the model *b* = `r c1$estimate`, `r label(c1$ci)` = `r c1$ci`, *t*(`r round(b$fstatistic[3])`) = `r c1$statistic`, *p* = `r c1$p.value`; as was Symbolic Moral Identity, *b* = `r c2$estimate`, `r label(c2$ci)` = `r c2$ci`, *t*(`r round(b$fstatistic[3])`) = `r c2$statistic`, *p* = `r c2$p.value`. There was also a significant Political Ideology  &#215; Internalized Moral Identity interaction, *b*  = `r c4$estimate`, `r label(c4$ci)` = `r c4$ci`, *t*(`r round(b$fstatistic[3])`) = `r c4$statistic`, *p* = `r c4$p.value` remained. There were no additional effects involving the variables of interest. While there was no significant interaction with Country and any of the variables of interest, for consistency, we proceeded with regressions for the USA and New Zealand samples separately. 
 
+
+```{r}
+
+c5 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity internal $\\times$ Political ideology"),])
+
+
+
+c7 <- ci_fun(apa_lm$table[which(apa_lm$table$predictor=="Country $\\times$ Moral identity symbolic $\\times$ Political ideology"),])
+```
+
+
+Predicted three way interactions were not observed for *b* = `r c5$estimate`, `r label(c5$ci)` = `r c5$ci`, *t*(`r round(b$fstatistic[3])`) = `r c5$statistic`, *p* = `r c5$p.value`; nor for Symbolization  *b* = `r c7$estimate`, `r label(c7$ci)` = `r c7$ci`, *t*(`r round(b$fstatistic[3])`) = `r c7$statistic`, *p* = `r c7$p.value`. 
 
 
 ```{r regression6full, include=FALSE}
