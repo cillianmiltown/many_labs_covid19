@@ -2305,6 +2305,8 @@ suppressWarnings(print(g))
   
 ``` 
 
+
+
 # Supplementary Analysis
 
 ```{r}
@@ -3417,13 +3419,71 @@ df <-
 
 ```
 
-### Plot
+### Plots
 
 Figure \@ref(fig:policyMIsNZLUSA1) shows the relationship between Political Ideology and Internal Moral Identity in predicting Policy Support for the New Zealand sample and the USA sample separately.
 
 ```{r policyMIsNZLUSA1, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Policy Support", include=TRUE, message=FALSE, fig.height=3}
 df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
 g <- ggplot(df1, aes(moral_identity_internal, policy_support_tot, linetype =political_ideology_3groups))+
+  geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
+  #ylim(0,12) +
+  geom_smooth(method=lm, size = .5, color="black") +
+  labs(y = "Policy Support",
+       x = "Internal Moral Identity",
+       linetype = "Political Ideology"
+       )+
+  theme_apa()+
+  scale_linetype_manual(values = c("longdash", "solid", "dotted"),
+                    labels=c("Conservative",
+                           "Moderate",
+                           "Liberal"))+
+  facet_wrap(df1$country)+
+  theme_bw()+
+  theme(plot.title=element_text(#family="Times",
+                                size=12
+                                )
+        , legend.text=element_text(#family="Times",
+                                 size=8
+                                 )
+        , legend.title=element_text(#family="Times",
+                                    size=10
+                                    )
+        , axis.text=element_text(#family="Times",
+                                 colour = "black",
+                                 size=8
+                                 )
+        , axis.ticks.x = element_blank()
+        , axis.title=element_text(#family="Times",
+                                  size=12
+                                  )
+        , strip.text=element_text(#family = "Times",
+                                  size = 12
+                                  )
+        , strip.background = element_rect(fill = NA, size = 1,
+                                           colour = "white"
+                                          )
+        , panel.border = element_blank()
+        , axis.line.x = element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , axis.line.y = # element_blank()
+          element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , legend.position="right"
+        , panel.spacing = unit(2, "lines")
+        )
+
+suppressWarnings(print(g))
+  
+```
+
+
+
+Figure \@ref(fig:policyMIsymbolicNZLUSA1) shows the relationship between Political Ideology and Symbolic Moral Identity in predicting Policy Support for the New Zealand sample and the USA sample separately.
+
+```{r policyMIsymbolicNZLUSA1, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Policy Support", include=TRUE, message=FALSE, fig.height=3}
+df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
+g <- ggplot(df1, aes(moral_identity_symbolic, policy_support_tot, linetype =political_ideology_3groups))+
   geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
@@ -3785,7 +3845,7 @@ df <-
 
 ```
 
-### Plot
+### Plots
 
 Figure \@ref(fig:contactMIsNZLUSA1) shows the relationship between Political Ideology and Internal Moral Identity in predicting Physical Contact for the New Zealand sample and the USA sample separately.
 
@@ -3842,6 +3902,64 @@ g <- ggplot(df1, aes(moral_identity_internal, physical_contact_tot, linetype =po
 suppressWarnings(print(g))
   
 ```
+
+
+Figure \@ref(fig:contactMIsymbolicNZLUSA1) shows the relationship between Political Ideology and Symbolic Moral Identity in predicting Policy Support for the New Zealand sample and the USA sample separately.
+
+```{r contactMIsymbolicNZLUSA1, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Policy Support", include=TRUE, message=FALSE, fig.height=3}
+df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
+g <- ggplot(df1, aes(moral_identity_symbolic, physical_contact_tot, linetype =political_ideology_3groups))+
+  geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
+  #ylim(0,12) +
+  geom_smooth(method=lm, size = .5, color="black") +
+  labs(y = "Policy Support",
+       x = "Internal Moral Identity",
+       linetype = "Political Ideology"
+       )+
+  theme_apa()+
+  scale_linetype_manual(values = c("longdash", "solid", "dotted"),
+                    labels=c("Conservative",
+                           "Moderate",
+                           "Liberal"))+
+  facet_wrap(df1$country)+
+  theme_bw()+
+  theme(plot.title=element_text(#family="Times",
+                                size=12
+                                )
+        , legend.text=element_text(#family="Times",
+                                 size=8
+                                 )
+        , legend.title=element_text(#family="Times",
+                                    size=10
+                                    )
+        , axis.text=element_text(#family="Times",
+                                 colour = "black",
+                                 size=8
+                                 )
+        , axis.ticks.x = element_blank()
+        , axis.title=element_text(#family="Times",
+                                  size=12
+                                  )
+        , strip.text=element_text(#family = "Times",
+                                  size = 12
+                                  )
+        , strip.background = element_rect(fill = NA, size = 1,
+                                           colour = "white"
+                                          )
+        , panel.border = element_blank()
+        , axis.line.x = element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , axis.line.y = # element_blank()
+          element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , legend.position="right"
+        , panel.spacing = unit(2, "lines")
+        )
+
+suppressWarnings(print(g))
+  
+```
+
 
 ### USA Regression
 
@@ -4120,7 +4238,7 @@ df <-
 
 ```
 
-### Plot
+### Plots
 
 Figure \@ref(fig:hygieneMIsNZLUSA1) shows the relationship between Political Ideology and Internal Moral Identity in predicting Physical Hygiene for the New Zealand sample and the USA sample separately (note that these effects are equivalent).
 
@@ -4177,6 +4295,65 @@ g <- ggplot(df1, aes(moral_identity_internal, physical_hygiene_tot, linetype =po
 suppressWarnings(print(g))
   
 ```
+
+
+
+Figure \@ref(fig:hygieneMIsymbolicNZLUSA1) shows the relationship between Political Ideology and Symbolic Moral Identity in predicting Policy Support for the New Zealand sample and the USA sample separately.
+
+```{r hygieneMIsymbolicNZLUSA1, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Policy Support", include=TRUE, message=FALSE, fig.height=3}
+df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
+g <- ggplot(df1, aes(moral_identity_symbolic, physical_hygiene_tot, linetype =political_ideology_3groups))+
+  geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
+  #ylim(0,12) +
+  geom_smooth(method=lm, size = .5, color="black") +
+  labs(y = "Policy Support",
+       x = "Internal Moral Identity",
+       linetype = "Political Ideology"
+       )+
+  theme_apa()+
+  scale_linetype_manual(values = c("longdash", "solid", "dotted"),
+                    labels=c("Conservative",
+                           "Moderate",
+                           "Liberal"))+
+  facet_wrap(df1$country)+
+  theme_bw()+
+  theme(plot.title=element_text(#family="Times",
+                                size=12
+                                )
+        , legend.text=element_text(#family="Times",
+                                 size=8
+                                 )
+        , legend.title=element_text(#family="Times",
+                                    size=10
+                                    )
+        , axis.text=element_text(#family="Times",
+                                 colour = "black",
+                                 size=8
+                                 )
+        , axis.ticks.x = element_blank()
+        , axis.title=element_text(#family="Times",
+                                  size=12
+                                  )
+        , strip.text=element_text(#family = "Times",
+                                  size = 12
+                                  )
+        , strip.background = element_rect(fill = NA, size = 1,
+                                           colour = "white"
+                                          )
+        , panel.border = element_blank()
+        , axis.line.x = element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , axis.line.y = # element_blank()
+          element_line(size = 0.1
+                                     , linetype = "solid", colour = "black")
+        , legend.position="right"
+        , panel.spacing = unit(2, "lines")
+        )
+
+suppressWarnings(print(g))
+  
+```
+
 
 ### USA Regression
 
