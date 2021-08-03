@@ -3430,7 +3430,7 @@ g <- ggplot(df1, aes(moral_identity_internal, policy_support_tot, linetype =poli
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
   labs(y = "Policy Support",
-       x = "Internal Moral Identity",
+       x = "Symbolic Moral Identity",
        linetype = "Political Ideology"
        )+
   theme_apa()+
@@ -3904,7 +3904,7 @@ suppressWarnings(print(g))
 ```
 
 
-Figure \@ref(fig:contactMIsymbolicNZLUSA1) shows the relationship between Political Ideology and Symbolic Moral Identity in predicting Policy Support for the New Zealand sample and the USA sample separately.
+Figure \@ref(fig:contactMIsymbolicNZLUSA1) shows the relationship between Political Ideology and Symbolic Moral Identity in predicting Physical contact for the New Zealand sample and the USA sample separately.
 
 ```{r contactMIsymbolicNZLUSA1, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Policy Support", include=TRUE, message=FALSE, fig.height=3}
 df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
@@ -3912,8 +3912,8 @@ g <- ggplot(df1, aes(moral_identity_symbolic, physical_contact_tot, linetype =po
   geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
-  labs(y = "Policy Support",
-       x = "Internal Moral Identity",
+  labs(y = "Physical Contact",
+       x = "Symbolic Moral Identity",
        linetype = "Political Ideology"
        )+
   theme_apa()+
@@ -4298,7 +4298,7 @@ suppressWarnings(print(g))
 
 
 
-Figure \@ref(fig:hygieneMIsymbolicNZLUSA1) shows the relationship between Political Ideology and Symbolic Moral Identity in predicting Policy Support for the New Zealand sample and the USA sample separately.
+Figure \@ref(fig:hygieneMIsymbolicNZLUSA1) shows the relationship between Political Ideology and Symbolic Moral Identity in predicting Physical Hygiene for the New Zealand sample and the USA sample separately.
 
 ```{r hygieneMIsymbolicNZLUSA1, fig.cap="USA: Interaction between Political Ideology and Internal Moral Identity in predicting Policy Support", include=TRUE, message=FALSE, fig.height=3}
 df1 <- df[which(df$country=="USA"|df$country=="NZL"),]
@@ -4306,8 +4306,8 @@ g <- ggplot(df1, aes(moral_identity_symbolic, physical_hygiene_tot, linetype =po
   geom_jitter(height = .1, width = .1, size=.0001, color="gray") + 
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
-  labs(y = "Policy Support",
-       x = "Internal Moral Identity",
+  labs(y = "Physical Hygiene",
+       x = "Symbolic Moral Identity",
        linetype = "Political Ideology"
        )+
   theme_apa()+
