@@ -3430,7 +3430,7 @@ g <- ggplot(df1, aes(moral_identity_internal, policy_support_tot, linetype =poli
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
   labs(y = "Policy Support",
-       x = "Symbolic Moral Identity",
+       x = "Internal Moral Identity",
        linetype = "Political Ideology"
        )+
   theme_apa()+
