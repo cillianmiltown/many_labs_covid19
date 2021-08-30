@@ -2,7 +2,7 @@
 title: "Moral ID and COVID"
 subtitle: "Results"
 author: "Cillian McHugh"
-date: "19th July 2021"
+date: "30 August 2021"
 bibliography      : "../../Research_general/resources/bib/My Library.bib"
 csl: "../../Research_general/apa.csl"
 output:
@@ -1279,7 +1279,7 @@ g <- ggplot(df1, aes(moral_identity_internal, policy_support_tot, linetype =poli
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
   labs(y = "Policy Support",
-       x = "Internal Moral Identity",
+       x = "Moral Identity Internalization",
        linetype = "Political Ideology"
        )+
   theme_apa()+
@@ -1798,7 +1798,7 @@ g <- ggplot(df1, aes(moral_identity_internal, physical_contact_tot, linetype =po
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
   labs(y = "Physical Contact",
-       x = "Internal Moral Identity",
+       x = "Moral Identity Internalization",
        linetype = "Political Ideology"
        )+
   theme_apa()+
@@ -2258,7 +2258,7 @@ g <- ggplot(df1, aes(moral_identity_internal, physical_hygiene_tot, linetype =po
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
   labs(y = "Physical Hygiene",
-       x = "Internal Moral Identity",
+       x = "Moral Identity Internalization",
        linetype = "Political Ideology"
        )+
   theme_apa()+
@@ -3430,7 +3430,7 @@ g <- ggplot(df1, aes(moral_identity_internal, policy_support_tot, linetype =poli
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
   labs(y = "Policy Support",
-       x = "Internal Moral Identity",
+       x = "Moral Identity Internalization",
        linetype = "Political Ideology"
        )+
   theme_apa()+
@@ -3488,7 +3488,7 @@ g <- ggplot(df1, aes(moral_identity_symbolic, policy_support_tot, linetype =poli
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
   labs(y = "Policy Support",
-       x = "Symbolic Moral Identity",
+       x = "Moral Identity Symbolization",
        linetype = "Political Ideology"
        )+
   theme_apa()+
@@ -3856,7 +3856,7 @@ g <- ggplot(df1, aes(moral_identity_internal, physical_contact_tot, linetype =po
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
   labs(y = "Physical Contact",
-       x = "Internal Moral Identity",
+       x = "Moral Identity Internalization",
        linetype = "Political Ideology"
        )+
   theme_apa()+
@@ -3913,7 +3913,7 @@ g <- ggplot(df1, aes(moral_identity_symbolic, physical_contact_tot, linetype =po
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
   labs(y = "Physical Contact",
-       x = "Symbolic Moral Identity",
+       x = "Moral Identity Symbolization",
        linetype = "Political Ideology"
        )+
   theme_apa()+
@@ -4249,7 +4249,7 @@ g <- ggplot(df1, aes(moral_identity_internal, physical_hygiene_tot, linetype =po
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
   labs(y = "Physical Hygiene",
-       x = "Internal Moral Identity",
+       x = "Moral Identity Internalization",
        linetype = "Political Ideology"
        )+
   theme_apa()+
@@ -4307,7 +4307,7 @@ g <- ggplot(df1, aes(moral_identity_symbolic, physical_hygiene_tot, linetype =po
   #ylim(0,12) +
   geom_smooth(method=lm, size = .5, color="black") +
   labs(y = "Physical Hygiene",
-       x = "Symbolic Moral Identity",
+       x = "Moral Identity Symbolization",
        linetype = "Political Ideology"
        )+
   theme_apa()+
